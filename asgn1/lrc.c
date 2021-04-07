@@ -3,6 +3,7 @@
 
 #include <inttypes.h>
 #include <stdio.h>
+#include <string.h>
 #include <stdlib.h>
 #include <assert.h>
 #include "philos.h"
@@ -57,8 +58,9 @@ int main(void){
     int pot = 0;
     int max_name_len = 100;
     int alive = num_players; // counter of players still in game
-    char players[num_players][max_name_len]; // list of character names
+    char *players[num_players]; // list of character names
     int money[num_players]; // array representing money held by each player
+    int pos = 0;
 
     // instantiate player array with names and money array with starting values
     for (int i = 0; i < num_players; i++) {
@@ -69,13 +71,42 @@ int main(void){
 
     
     /* GAMELOOP */
-    
+    while (alive > 1) {
+        if (money[pos] != 0) { // only roll if still in the game
+	    int start_money = money[i]
+	    for (int rolls = 0; rolls <= (start_money < 3) ? start_money : 3; rolls++) { // if player has < $3, roll that # of times, else roll 3 times
+                faces roll = die[roll(6)];
+		if (roll == LEFT) {
+                    //LEFT
+		    int left = left(pos, num_players); // index of player to the left
+		    money[pos] -= 1; // Deduct $1 from current player
+                    if (money[left] <= 0) {
+                        alive += 1; // if left player was out, bring them back in
+		    }
+                    money[left] += 1;
+		    printf(" gives $1 to %s", players[left]);
+		}
+		else if (roll == RIGHT) {
+                    //RIGHT
+		    int right = right(pos, num_players); // index of player to the left
+		    money[pos] -= 1; // Deduct $1 from current player
+                    if (money[right] <= 0) {
+                        alive += 1; // if left player was out, bring them back in
+		    }
+                    money[right] += 1;
+		    printf(" gives $1 to %s", players[right]);
+		}
+		else if (roll == CENTER) {
+                    //CENTER
+		    money[pos] -= 1; // Deduct $1 from current player
+                    pot += 1;
+		    printf(" puts $1 in the pot");
 
-
-
-
-
-
-
-
+		}
+		else {
+                    //PASS
+		}
+	    }
+	}	
+    }  
 }
