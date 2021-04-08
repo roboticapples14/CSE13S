@@ -40,12 +40,6 @@ int main(void){
     int num_players;
     int seed = 2021;
 
-    // Get num of players from user input: must be 1-14
-    printf("Number of players: ");
-    if ((scanf("%u", &num_players) < 1) || num_players < 2 || num_players > 14) {
-        fprintf(stderr, "Invalid number of players.\n");
-        return 1;
-    }
 
     // Get random seed from user input
     printf("Random seed: ");
@@ -55,8 +49,14 @@ int main(void){
     }
     srandom(seed); // Set starting point for pseudorandom number generator
     
+    // Get num of players from user input: must be 1-14
+    printf("Number of players: ");
+    if ((scanf("%u", &num_players) < 1) || num_players < 2 || num_players > 14) {
+        fprintf(stderr, "Invalid number of players.\n");
+        return 1;
+    }
+
     int pot = 0;
-    int max_name_len = 100;
     int alive = num_players; // counter of players still in game
     char *players[num_players]; // list of character names
     int money[num_players]; // array representing money held by each player
@@ -73,44 +73,46 @@ int main(void){
     /* GAMELOOP */
     while (alive > 1) {
         if (money[pos] > 0) { // only roll if still in the game
+	    printf("%s rolls...", players[pos]);
 	    int start_money = money[pos];
-	    for (int rolls = 0; rolls <= (start_money < 3) ? start_money : 3; rolls++) { // if player has < $3, roll that # of times, else roll 3 times
-                faces roll = die[roll(6)];
-		if (roll == LEFT) {
+	    for (int rolls = 0; rolls < ((start_money < 3) ? start_money : 3); rolls += 1) { // if player has < $3, roll that # of times, else roll 3 times
+                int this_roll = roll(6); // roll 6 sided dice, should return random # 1-6
+		if (die[this_roll] == LEFT) {
                     //LEFT
-		    int left = left(pos, num_players); // index of player to the left
+		    int left_index = left(pos, num_players); // index of player to the left
 		    money[pos] -= 1; // Deduct $1 from current player
-                    if (money[left] <= 0) {
+                    if (money[left_index] == 0) {
                         alive += 1; // if left player was out, bring them back in
 		    }
-                    money[left] += 1;
-		    printf(" gives $1 to %s", players[left]);
+                    money[left_index] += 1;
+		    printf(" gives $1 to %s", players[left_index]);
 		}
-		else if (roll == RIGHT) {
+		else if (die[this_roll] == RIGHT) {
                     //RIGHT
-		    int right = right(pos, num_players); // index of player to the left
+		    int right_index = right(pos, num_players); // index of player to the left
 		    money[pos] -= 1; // Deduct $1 from current player
-                    if (money[right] <= 0) {
+                    if (money[right_index] == 0) {
                         alive += 1; // if left player was out, bring them back in
 		    }
-                    money[right] += 1;
-		    printf(" gives $1 to %s", players[right]);
+                    money[right_index] += 1;
+		    printf(" gives $1 to %s", players[right_index]);
 		}
-		else if (roll == CENTER) {
+		else if (die[this_roll] == CENTER) {
                     //CENTER
 		    money[pos] -= 1; // Deduct $1 from current player
                     pot += 1;
 		    printf(" puts $1 in the pot");
-
 		}
 		else {
                     //PASS
+		    printf(" gets a pass");
 		}
 	    }
 	    // check if player lost
 	    if (money[pos] <= 0) {
                 alive -= 1;
 	    }
+	    printf("\n");
 	}
         // itterate pos to next player
 	pos = right(pos, num_players);
@@ -119,7 +121,7 @@ int main(void){
     if (alive == 1) {
         for (int i = 0; i < num_players; i++) {
             if (money[i] > 0) {
-                printf("%s wins the $%i pot with $%i left in the bank!", players[i], pot, money[i]);
+                printf("%s wins the $%i pot with $%i left in the bank!\n", players[i], pot, money[i]);
 	    }
 	}
     }
