@@ -72,8 +72,8 @@ int main(void){
     
     /* GAMELOOP */
     while (alive > 1) {
-        if (money[pos] != 0) { // only roll if still in the game
-	    int start_money = money[i]
+        if (money[pos] > 0) { // only roll if still in the game
+	    int start_money = money[pos];
 	    for (int rolls = 0; rolls <= (start_money < 3) ? start_money : 3; rolls++) { // if player has < $3, roll that # of times, else roll 3 times
                 faces roll = die[roll(6)];
 		if (roll == LEFT) {
@@ -107,6 +107,21 @@ int main(void){
                     //PASS
 		}
 	    }
-	}	
-    }  
+	    // check if player lost
+	    if (money[pos] <= 0) {
+                alive -= 1;
+	    }
+	}
+        // itterate pos to next player
+	pos = right(pos, num_players);
+    }
+
+    if (alive == 1) {
+        for (int i = 0; i < num_players; i++) {
+            if (money[i] > 0) {
+                printf("%s wins the $%i pot with $%i left in the bank!", players[i], pot, money[i]);
+	    }
+	}
+    }
+    return 0;
 }
