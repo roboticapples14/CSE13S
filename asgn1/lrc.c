@@ -119,7 +119,8 @@ int main(void){
         // itterate pos to next player
 	pos = right(pos, num_players);
     }
-
+    // exits while loop once only 1 player left in the game
+    // Print winner
     if (alive == 1) {
         for (int i = 0; i < num_players; i++) {
             if (money[i] > 0) {
