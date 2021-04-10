@@ -42,6 +42,7 @@ int main(void){
 
 
     // Get random seed from user input
+    // inspired by vampire code
     printf("Random seed: ");
     if (scanf("%u", &seed) < 1) { // unsigned means it cannot be negative if valid
         fprintf(stderr, "Invalid random seed.\n");
@@ -50,9 +51,10 @@ int main(void){
     srandom(seed); // Set starting point for pseudorandom number generator
     
     // Get num of players from user input: must be 1-14
-    printf("Number of players: ");
+    // inspired by vampire code
+    printf("How many players? ");
     if ((scanf("%u", &num_players) < 1) || num_players < 2 || num_players > 14) {
-        fprintf(stderr, "Invalid number of players.\n");
+        fprintf(stderr, "Number of players must be from 1 to 14.\n");
         return 1;
     }
 
