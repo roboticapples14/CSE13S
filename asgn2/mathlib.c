@@ -3,7 +3,6 @@
 #include <math.h> //only for using sin and cos
 
 #define EPSILON 1e-10
-#define PI 3.14159265358979323846264338327950288
 
 // Declare helper functions
 double Abs(double x);
@@ -56,7 +55,7 @@ double arcSin(double x) {
 }
 double arcCos(double x) {
     double result;
-    result = (PI/2) - arcSin(x);
+    result = (M_PI/2) - arcSin(x);
     return result;
 }
 double arcTan(double x) {
