@@ -38,40 +38,38 @@ int main(int argc, char **argv) {
     }
     // Executes functions
     if (arcsin ==1) {
-        printf("x\t\t\tarcSin\t\t\tLibrary\t\t\tDifference\n");
-	printf("-\t\t\t------\t\t\t-------\t\t\t----------\n");
+        printf("x\t\tarcSin\t\tLibrary\t\tDifference\n");
+	printf("-\t\t------\t\t-------\t\t----------\n");
 
 	// range = [-1, 1), step = 0.1
 	for (double i = -1.0; i < 1.0; i += 0.1) {
-            // credit to Wednesday 10am section on 4/14 for number formatting
-            printf("%7.4lf \t% 16.8lf \t% 16.8lf \t% 16.10lf\n", i, arcSin(i), asin(i), arcSin(i) - asin(i));
+            printf("%7.4lf % 16.8lf % 16.8lf % 16.10lf\n", i, arcSin(i), asin(i), arcSin(i) - asin(i));
 	}
     }
     if (arccos == 1) {
-        printf("x\t\t\tarcCos\t\t\tLibrary\t\t\tDifference\n");
-	printf("-\t\t\t------\t\t\t-------\t\t\t----------\n");
+        printf("x\t\tarcCos\t\tLibrary\t\tDifference\n");
+	printf("-\t\t------\t\t-------\t\t----------\n");
 	// range = [-1, 1), step = 0.1
 	for (double i = -1.0; i < 1.0; i += 0.1) {
-            // credit to Wednesday 10am section on 4/14 for number formatting
-            printf("%7.4lf \t% 16.8lf \t% 16.8lf \t% 16.10lf\n", i, arcCos(i), acos(i), arcCos(i) - acos(i));
+            printf("%7.4lf % 16.8lf % 16.8lf % 16.10lf\n", i, arcCos(i), acos(i), arcCos(i) - acos(i));
 	}
     }
     if (arctan == 1) {
-        printf("x\t\t\tarcTan\t\t\tLibrary\t\t\tDifference\n");
-	printf("-\t\t\t------\t\t\t-------\t\t\t----------\n");
+        printf("x\t\tarcTan\t\tLibrary\t\tDifference\n");
+	printf("-\t\t------\t\t-------\t\t----------\n");
 	// range = [1, 10), step = 0.1
 	for (double i = 1.0; i < 10.0; i += 0.1) {
             // credit to Wednesday 10am section on 4/14 for number formatting
-            printf("%7.4lf \t% 16.8lf \t% 16.8lf \t% 16.10lf\n", i, arcTan(i), atan(i), arcTan(i) - atan(i));
+            printf("%7.4lf % 16.8lf % 16.8lf % 16.10lf\n", i, arcTan(i), atan(i), arcTan(i) - atan(i));
 	}
     }
     if (logorithm == 1) {
-        printf("x\t\t\tLog\t\t\tLibrary\t\t\tDifference\n");
-	printf("-\t\t\t------\t\t\t-------\t\t\t----------\n");
+        printf("x\t\tLog\t\tLibrary\t\tDifference\n");
+	printf("-\t\t------\t\t-------\t\t----------\n");
 	// range = [1, 10), step = 0.1
 	for (double i = 1.0; i < 10.0; i += 0.1) {
             // credit to Wednesday 10am section on 4/14 for number formatting
-            printf("%7.4lf \t% 16.8lf \t% 16.8lf \t% 16.10lf\n", i, Log(i), log(i), Log(i) - log(i));
+            printf("%7.4lf % 16.8lf % 16.8lf % 16.10lf\n", i, Log(i), log(i), Log(i) - log(i));
 	}
     }
 }
