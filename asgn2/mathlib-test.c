@@ -25,15 +25,27 @@ int main(int argc, char **argv) {
         case 't': arctan = 1; break;
         case 'l': logorithm = 1; break;
         default:
-            printf("Invalid input. Correct usage is as follows:\nEnter:\n\ts for arcsin\n\tc for "
-                   "cossin\n\tt for arctan\n\tl for log\n\ta for all.\n");
+            printf("Program usage: ./mathlib-test -[asctl]\n");
+	    printf("  -a   Runs all tests (arcsin, arccos, arctan, log)\n");
+	    printf("  -s   Runs arcsin tests\n");
+	    printf("  -c   Runs arccos tests\n");
+	    printf("  -t   Runs arctan tests\n");
+	    printf("  -l   Runs log tests\n");
             return 1;
         }
     }
+    if (arcsin == 0 && arccos == 0 && arctan == 0 && logorithm == 0) {
+            printf("Program usage: ./mathlib-test -[asctl]\n");
+	    printf("  -a   Runs all tests (arcsin, arccos, arctan, log)\n");
+	    printf("  -s   Runs arcsin tests\n");
+	    printf("  -c   Runs arccos tests\n");
+	    printf("  -t   Runs arctan tests\n");
+	    printf("  -l   Runs log tests\n");
+    }
     // Executes functions
     if (arcsin == 1) {
-        printf("x\t\tarcSin\t\tLibrary\t\tDifference\n");
-        printf("-\t\t------\t\t-------\t\t----------\n");
+        printf(" x            arcSin           Library        Difference\n");
+        printf(" -            ------           -------        ----------\n");
 
         // range = [-1, 1), step = 0.1
         for (double i = -1.0; i < 1.0; i += 0.1) {
@@ -42,8 +54,8 @@ int main(int argc, char **argv) {
         }
     }
     if (arccos == 1) {
-        printf("x\t\tarcCos\t\tLibrary\t\tDifference\n");
-        printf("-\t\t------\t\t-------\t\t----------\n");
+        printf(" x            arcCos           Library        Difference\n");
+        printf(" -            ------           -------        ----------\n");
         // range = [-1, 1), step = 0.1
         for (double i = -1.0; i < 1.0; i += 0.1) {
             printf(
@@ -51,18 +63,17 @@ int main(int argc, char **argv) {
         }
     }
     if (arctan == 1) {
-        printf("x\t\tarcTan\t\tLibrary\t\tDifference\n");
-        printf("-\t\t------\t\t-------\t\t----------\n");
+        printf(" x            arcTan           Library        Difference\n");
+        printf(" -            ------           -------        ----------\n");
         // range = [1, 10), step = 0.1
         for (double i = 1.0; i < 10.0; i += 0.1) {
-            // credit to Wednesday 10am section on 4/14 for number formatting
             printf(
                 "%7.4lf % 16.8lf % 16.8lf % 16.10lf\n", i, arcTan(i), atan(i), arcTan(i) - atan(i));
         }
     }
     if (logorithm == 1) {
-        printf("x\t\tLog\t\tLibrary\t\tDifference\n");
-        printf("-\t\t------\t\t-------\t\t----------\n");
+        printf(" x            Log              Library        Difference\n");
+        printf(" -            ------           -------        ----------\n");
         // range = [1, 10), step = 0.1
         for (double i = 1.0; i < 10.0; i += 0.1) {
             // credit to Wednesday 10am section on 4/14 for number formatting
