@@ -26,21 +26,21 @@ int main(int argc, char **argv) {
         case 'l': logorithm = 1; break;
         default:
             printf("Program usage: ./mathlib-test -[asctl]\n");
-	    printf("  -a   Runs all tests (arcsin, arccos, arctan, log)\n");
-	    printf("  -s   Runs arcsin tests\n");
-	    printf("  -c   Runs arccos tests\n");
-	    printf("  -t   Runs arctan tests\n");
-	    printf("  -l   Runs log tests\n");
+            printf("  -a   Runs all tests (arcsin, arccos, arctan, log)\n");
+            printf("  -s   Runs arcsin tests\n");
+            printf("  -c   Runs arccos tests\n");
+            printf("  -t   Runs arctan tests\n");
+            printf("  -l   Runs log tests\n");
             return 1;
         }
     }
     if (arcsin == 0 && arccos == 0 && arctan == 0 && logorithm == 0) {
-            printf("Program usage: ./mathlib-test -[asctl]\n");
-	    printf("  -a   Runs all tests (arcsin, arccos, arctan, log)\n");
-	    printf("  -s   Runs arcsin tests\n");
-	    printf("  -c   Runs arccos tests\n");
-	    printf("  -t   Runs arctan tests\n");
-	    printf("  -l   Runs log tests\n");
+        printf("Program usage: ./mathlib-test -[asctl]\n");
+        printf("  -a   Runs all tests (arcsin, arccos, arctan, log)\n");
+        printf("  -s   Runs arcsin tests\n");
+        printf("  -c   Runs arccos tests\n");
+        printf("  -t   Runs arctan tests\n");
+        printf("  -l   Runs log tests\n");
     }
     // Executes functions
     if (arcsin == 1) {
