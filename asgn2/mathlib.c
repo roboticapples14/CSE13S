@@ -43,6 +43,7 @@ double Abs(double x) {
     return ((x < 0) ? (-1 * x) : x);
 }
 
+//arcSin using Newton's method
 double arcSin(double x) {
     double new = x;
     double old = 0.0;
@@ -52,17 +53,22 @@ double arcSin(double x) {
     }
     return new;
 }
+
+//arcCos using equation arccos(x) = (pi/2) - arcsin(x)
 double arcCos(double x) {
     double result;
     result = (M_PI / 2) - arcSin(x);
     return result;
 }
+
+//arctan using equation arctan(x) = arcsin(x / sqrt(x^2 + 1))
 double arcTan(double x) {
     double result;
     result = arcSin(x / Sqrt(x * x + 1));
     return result;
 }
 
+//log using newton's method
 double Log(double x) {
     double new = 1.0;
     double old = 0.0;
