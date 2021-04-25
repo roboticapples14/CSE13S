@@ -13,12 +13,15 @@
 void print_instructions();
 int compares;
 int moves;
-
+uint32_t max_stack_size;
+uint32_t max_queue_size;
 
 int main(int argc, char **argv) {
     int opt = 0;
     extern int compares;
     extern int moves;
+    extern uint32_t max_stack_size;
+    extern uint32_t max_queue_size;
     // int markers for which functions to run
     int bubble = 0;
     int shell = 0;
@@ -76,35 +79,49 @@ int main(int argc, char **argv) {
 	return 1;
     }
 
+
     // set random seed to given seed
     srandom(seed);
-
-    // if elements to print is larger than size of array, set elements = size to prevent overflow 
-    if (elements > size) {
-        elements = size;
-    }
     
-    // Generates array to be sorted of len size
-    uint32_t arr[size];
-    for (uint32_t i = 0; i < size; i++) {
-        arr[i] = random(); 
-    }
-
+    // if elements to print is larger than size of array, set elements = size to prevent overflow 
+    /*if (elements > size) {
+        elements = size;
+    }*/
+    
 
     // Executes sorts
     if (bubble == 1) {
+        // set random seed to given seed
+        srandom(seed);
+        // Generates new (unsorted) array to be sorted of len size
+        uint32_t arr[size];  
+        for (uint32_t i = 0; i < size; i++) {
+            arr[i] = random(); 
+        }
+
+	// bubble sort array
         bubble_sort(arr, size);
         printf("Bubble Sort\n");
 	printf("%i elements, %i moves, %i compares\n", size, moves, compares);
         for (uint32_t j = 0; j < elements; j++) {
-            if (j % 5 == 0) {
+            // newline every 5th element
+	    if (j % 5 == 0) {
                 printf("\n");
 	    }
 	    printf("%13" PRIu32, arr[j]);
 	}
 	printf("\n");
     }
+    
     if (shell == 1) {
+        // re-set random seed to given seed (to ensure all randomly generated arrays are the same)
+        srandom(seed);
+        // Generates new (unsorted) array to be sorted of len size
+        uint32_t arr[size];  
+        for (uint32_t i = 0; i < size; i++) {
+            arr[i] = random(); 
+        }
+
         shell_sort(arr, size);
 	// TODO: implement moves, compares, and stack/queue size vars
 	// Use extern vars?
@@ -120,12 +137,22 @@ int main(int argc, char **argv) {
     }
 
     if (quick_stack == 1) {
+        // re-set random seed to given seed (to ensure all randomly generated arrays are the same)
+        srandom(seed);
+        // Generates new (unsorted) array to be sorted of len size
+        uint32_t arr[size];  
+        for (uint32_t i = 0; i < size; i++) {
+            arr[i] = random(); 
+        }
+	
+	// sort arr
         quick_sort_stack(arr, size);
-	// TODO: implement moves, compares, and stack/queue size vars
-	// Use extern vars?
         printf("Quick Sort (Stack)\n");
+	// use extern vars moves, compares to keep track of sort stats
 	printf("%i elements, %i moves, %i compares\n", size, moves, compares);
-        for (uint32_t j = 0; j < elements; j++) {
+        printf("Max stack size: %i", max_stack_size);
+	for (uint32_t j = 0; j < elements; j++) {
+            // newline every 5th element printed
             if (j % 5 == 0) {
                 printf("\n");
 	    }
@@ -133,14 +160,25 @@ int main(int argc, char **argv) {
 	}
 	printf("\n");
     }
+
     if (quick_queue == 1) {
-        quick_sort_queue(arr, size);
-	// TODO: implement moves, compares, and stack/queue size vars
-	// Use extern vars?
+        // re-set random seed to given seed (to ensure all randomly generated arrays are the same)
+        srandom(seed);
+        // Generates new (unsorted) array to be sorted of len size
+        uint32_t arr[size];  
+        for (uint32_t i = 0; i < size; i++) {
+            arr[i] = random(); 
+        }
+	
+	// sort arr
+	quick_sort_queue(arr, size);
         printf("Quick Sort (Queue)\n");
+	// use extern vars moves, compares to keep track of sort stats
 	printf("%i elements, %i moves, %i compares\n", size, moves, compares);
+        printf("Max queue size: %i", max_queue_size);
         for (uint32_t j = 0; j < elements; j++) {
-            if (j % 5 == 0) {
+            // newline every 5th element printed
+	    if (j % 5 == 0) { 
                 printf("\n");
 	    }
             printf("%13" PRIu32, arr[j]);
@@ -148,7 +186,6 @@ int main(int argc, char **argv) {
 	printf("\n");
     }
 }
-
 
 
 void print_instructions() {

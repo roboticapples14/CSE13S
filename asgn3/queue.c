@@ -22,10 +22,12 @@ Queue *queue_create(uint32_t capacity) {
     if (q) {
         q->head = 0; 
 	q->tail = 0;
+	q->size = 0;
 	q->capacity = capacity; // set initial size of queue to given capacity
         q->items = (int64_t *) calloc(capacity, sizeof(int64_t));
 	if (!q->items) {
 	    free(q);
+	    q = NULL;
 	}
     }
     return q;
@@ -61,9 +63,9 @@ bool enqueue(Queue *q, int64_t x) {
         if (queue_full(q)) {
             return false;
 	}
-	q->items[q->head] = x;
-        q->head = (q->tail + 1) % q->capacity;
         q->size += 1;
+	q->items[q->tail] = x;
+        q->tail = (q->tail + 1) % q->capacity;
 	return true;
     }
     return false;
@@ -75,9 +77,9 @@ bool dequeue(Queue *q, int64_t *x) {
         if (queue_empty(q)) {
             return false;
 	}
-        *x = q->items[q->tail];
-        q->tail = (q->tail - 1) % q->capacity;
         q->size -= 1;
+        *x = q->items[q->head];
+        q->head = (q->head + 1) % q->capacity;
 	return true;
     }
     return false;
