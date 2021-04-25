@@ -1,4 +1,7 @@
 #include "queue.h"
+#include <stdio.h>
+#include <inttypes.h>
+#include <stdlib.h>
 
 //TODO CHANGE THIS TO LINKED LIST IMPLEMENTATION IF NEEDED
 
@@ -6,45 +9,45 @@
 
 
 //Struct code adopted from code given in asgn3 doc
-struct Queue {
+typedef struct Queue {
     uint32_t head;	// Index of head of the queue
     uint32_t tail;	// Index of the tail of the queue
     uint32_t size;	// The number of elements in the queue
     uint32_t capacity;	// Capacity of the queue
     int64_t *items; 	//Holds the items
-}
+} Queue;
 
 Queue *queue_create(uint32_t capacity) {
     Queue *q = (Queue *) malloc(sizeof(Queue)); // creates new queue using malloc to allocate space
     if (q) {
-        q->head = q->tail = 0;
+        q->head = 0; 
+	q->tail = 0;
 	q->capacity = capacity; // set initial size of queue to given capacity
-        q->Q = (item *) calloc(size, sizeof(item));
-	if (q->items) {
-            return q;
+        q->items = (int64_t *) calloc(capacity, sizeof(int64_t));
+	if (!q->items) {
+	    free(q);
 	}
-	free(q);
     }
     return q;
 }
 
 void queue_delete(Queue **q) {
     if (q) {
-        free(q->Q);
+        free((*q)->items);
 	free(q);
     }
 }
 
 bool queue_empty(Queue *q) {
     if (q) {
-        return q->head == q->tail;
+        return q->size == 0;
     }
     return true;
 }
 
 bool queue_full(Queue *q) {
     if (q) {
-        return succ(q, q->head) == q->tail;
+        return q->capacity == q->tail;
     }
     return true;
 }
@@ -53,4 +56,41 @@ uint32_t queue_size(Queue *q) {
     return q->size;
 }
 
+bool enqueue(Queue *q, int64_t x) {
+    if (q) {
+        if (queue_full(q)) {
+            return false;
+	}
+	q->items[q->head] = x;
+        q->head = (q->tail + 1) % q->capacity;
+        q->size += 1;
+	return true;
+    }
+    return false;
 
+}
+
+bool dequeue(Queue *q, int64_t *x) {
+    if (q) {
+        if (queue_empty(q)) {
+            return false;
+	}
+        *x = q->items[q->tail];
+        q->tail = (q->tail - 1) % q->capacity;
+        q->size -= 1;
+	return true;
+    }
+    return false;
+
+}
+
+void queue_print(Queue *q) {
+    printf("[");
+    for (uint32_t i = 0; i < q->head; i++) {
+        printf("%" PRId64, q->items[i]);
+        if (i + 1 != q->head) {
+            printf(", ");
+        }
+    }
+    printf("]\n");
+}

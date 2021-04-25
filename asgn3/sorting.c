@@ -5,12 +5,20 @@
 #include <inttypes.h>
 #include <math.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <unistd.h>
 
-#define OPTIONS "absqQrnp"
+#define OPTIONS "absqQr:n:p:"
+
+void print_instructions();
+int compares;
+int moves;
+
 
 int main(int argc, char **argv) {
     int opt = 0;
+    extern int compares;
+    extern int moves;
     // int markers for which functions to run
     int bubble = 0;
     int shell = 0;
@@ -18,7 +26,7 @@ int main(int argc, char **argv) {
     int quick_queue = 0;
     int seed = 13371453;
     uint32_t size = 100;
-    int elements = 100;
+    uint32_t elements = 100;
 
     //user input loop
     while ((opt = getopt(argc, argv, OPTIONS)) != -1) {
@@ -43,13 +51,13 @@ int main(int argc, char **argv) {
 	}
 	// output prefrences (optarg = value passed through with argument)
         if (opt == 'r') {
-            seed = optarg;
+            seed = atoi(optarg);
 	}
         if (opt == 'n') {
-            size = optarg;
+            size = atoi(optarg);
 	}
         if (opt == 'p') {
-            elements = optarg;
+            elements = atoi(optarg);
 	}
 	// if opt != any OPTIONS
 	if (opt != 'a' && opt != 'b' && opt != 's' && opt != 'q' && opt != 'Q' && opt != 'r' && opt != 'n' && opt != 'p') {
@@ -59,6 +67,7 @@ int main(int argc, char **argv) {
 	    return 1;
 	}
     }
+
     // if no sorting was selected
     if (!(bubble || shell || quick_stack || quick_queue))  {
 	// Instructions
@@ -67,6 +76,9 @@ int main(int argc, char **argv) {
 	return 1;
     }
 
+    // set random seed to given seed
+    srandom(seed);
+
     // if elements to print is larger than size of array, set elements = size to prevent overflow 
     if (elements > size) {
         elements = size;
@@ -74,64 +86,66 @@ int main(int argc, char **argv) {
     
     // Generates array to be sorted of len size
     uint32_t arr[size];
-    for (int i = 0; i < size; i++) {
+    for (uint32_t i = 0; i < size; i++) {
         arr[i] = random(); 
     }
 
 
     // Executes sorts
     if (bubble == 1) {
-        printf("Bubble Sort\n");
         bubble_sort(arr, size);
-	// TODO: implement moves, compares, and stack/queue size vars
-	// Use extern vars?
-	// printf("%i elements, %i moves, %i compares", elements, moves, compares);
-        for (int j = 0; j < elements; j++) {
-            if (j % 5) {
+        printf("Bubble Sort\n");
+	printf("%i elements, %i moves, %i compares\n", size, moves, compares);
+        for (uint32_t j = 0; j < elements; j++) {
+            if (j % 5 == 0) {
                 printf("\n");
 	    }
 	    printf("%13" PRIu32, arr[j]);
 	}
+	printf("\n");
     }
     if (shell == 1) {
-        printf("Shell Sort\n");
         shell_sort(arr, size);
 	// TODO: implement moves, compares, and stack/queue size vars
 	// Use extern vars?
-	// printf("%i elements, %i moves, %i compares", elements, moves, compares);
-        for (int j = 0; j < elements; j++) {
-            if (j % 5) {
+        printf("Shell Sort\n");
+	printf("%i elements, %i moves, %i compares\n", size, moves, compares);
+        for (uint32_t j = 0; j < elements; j++) {
+            if (j % 5 == 0) {
                 printf("\n");
 	    }
             printf("%13" PRIu32, arr[j]);
 	}
+	printf("\n");
     }
 
     if (quick_stack == 1) {
-        printf("Quick Sort (Stack)\n");
         quick_sort_stack(arr, size);
 	// TODO: implement moves, compares, and stack/queue size vars
 	// Use extern vars?
-	// printf("%i elements, %i moves, %i compares", elements, moves, compares);
-        for (int j = 0; j < elements; j++) {
-            if (j % 5) {
+        printf("Quick Sort (Stack)\n");
+	printf("%i elements, %i moves, %i compares\n", size, moves, compares);
+        for (uint32_t j = 0; j < elements; j++) {
+            if (j % 5 == 0) {
                 printf("\n");
 	    }
             printf("%13" PRIu32, arr[j]);
 	}
+	printf("\n");
     }
     if (quick_queue == 1) {
-        printf("Quick Sort (Queue)\n");
         quick_sort_queue(arr, size);
 	// TODO: implement moves, compares, and stack/queue size vars
 	// Use extern vars?
-	// printf("%i elements, %i moves, %i compares", elements, moves, compares);
-        for (int j = 0; j < elements; j++) {
-            if (j % 5) {
+        printf("Quick Sort (Queue)\n");
+	printf("%i elements, %i moves, %i compares\n", size, moves, compares);
+        for (uint32_t j = 0; j < elements; j++) {
+            if (j % 5 == 0) {
                 printf("\n");
 	    }
             printf("%13" PRIu32, arr[j]);
 	}
+	printf("\n");
     }
 }
 
