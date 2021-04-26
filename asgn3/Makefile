@@ -27,6 +27,9 @@ stack.o: stack.c
 clean:
 	rm -f *.o sorting
 
+format:
+	clang-format -i -style=file *.[ch]
+
 clang-format:
 	clang-format -i -style=file *.h *.c
 	
