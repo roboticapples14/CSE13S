@@ -21,7 +21,7 @@ void quick_sort_stack(uint32_t *A, uint32_t n) {
     extern uint32_t max_stack_size;
     int64_t lo = 0;
     int64_t hi = n - 1;
-    int64_t p;
+    uint64_t p;
     // resets compares and moves to 0
     compares = 0;
     moves = 0;
@@ -35,7 +35,7 @@ void quick_sort_stack(uint32_t *A, uint32_t n) {
         stack_pop(s, &hi); // pops into hi
 	stack_pop(s, &lo); // pops into lo
 	// update extern stack size var after pops
-	max_stack_size = stack_size(s);
+	max_stack_size = (stack_size(s) > max_stack_size) ? stack_size(s) : max_stack_size; // updates max stack size if current's > old
 
         // itterative call to partition with new hi & lo boundaries
 	p = partition(A, lo, hi);
@@ -45,13 +45,13 @@ void quick_sort_stack(uint32_t *A, uint32_t n) {
             stack_push(s, lo);
 	    stack_push(s, p);
 	    // update extern stack size var
-	    max_stack_size = stack_size(s);
+	    max_stack_size = (stack_size(s) > max_stack_size) ? stack_size(s) : max_stack_size; // updates max stack size if current's > old
 	}
         if (less_than(p + 1, hi)) { // comparison
             stack_push(s, p + 1);
 	    stack_push(s, hi);
 	    // update extern stack size var
-	    max_stack_size = stack_size(s);
+	    max_stack_size = (stack_size(s) > max_stack_size) ? stack_size(s) : max_stack_size; // updates max stack size if current's > old
 	}
     }
 }
@@ -75,8 +75,9 @@ void quick_sort_queue(uint32_t *A, uint32_t n) {
 	dequeue(q, &lo);
         dequeue(q, &hi);
         // update queue size after dequeues
-	max_queue_size = queue_size(q);
-        // itterative call to partition with new hi & lo boundaries
+	max_queue_size = (queue_size(q) > max_queue_size) ? queue_size(q) : max_queue_size; // updates max queue size if current's > old
+        
+	// itterative call to partition with new hi & lo boundaries
 	p = partition(A, lo, hi);
         
 	// keeps itterative loop going until sub-arrays are sufficently small (when lo and hi == pivot, meaning sub-arrays are only 1 or 0 items long)
@@ -84,13 +85,13 @@ void quick_sort_queue(uint32_t *A, uint32_t n) {
             enqueue(q, lo);
             enqueue(q, p);
 	    // update queue size after enqueues
-	    max_queue_size = queue_size(q);
+	    max_queue_size = (queue_size(q) > max_queue_size) ? queue_size(q) : max_queue_size; // updates max queue size if current's > old
         }
         if (less_than(p + 1, hi)) { // comparison
             enqueue(q, p + 1);
             enqueue(q, hi);
 	    // update queue size after enqueues
-	    max_queue_size = queue_size(q);
+	    max_queue_size = (queue_size(q) > max_queue_size) ? queue_size(q) : max_queue_size; // updates max queue size if current's > old
         }
     }
 }
@@ -99,7 +100,7 @@ static uint64_t partition(uint32_t *A, uint32_t lo, uint32_t hi) {
     // Declares external variables compares and moves, but not resetting to preserve count in sort
     extern int compares;
     extern int moves;
-    uint32_t pivot = A[lo + ((hi -lo) / 2)]; //prevent overflow
+    int32_t pivot = A[lo + ((hi - lo) / 2)]; //prevent overflow
     moves += 1;
     // i and j should be signed in order to rep -1 (lo - 1)
     int i = lo - 1;
@@ -119,7 +120,7 @@ static uint64_t partition(uint32_t *A, uint32_t lo, uint32_t hi) {
 	// now A[i] should be greater than A[j], so we swap them
 	// but only if index i < j
 	if (i < j) {
-            uint32_t temp = A[i];
+	    uint32_t temp = A[i];
             A[i] = A[j];
 	    A[j] = temp;
 	    moves += 3; //swaps = 3 moves
