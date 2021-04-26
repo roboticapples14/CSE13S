@@ -1,6 +1,7 @@
 #include "bubble.h"
-#include <stdlib.h>
+
 #include <stdbool.h>
+#include <stdlib.h>
 
 static bool less_than(uint32_t el_1, uint32_t el_2);
 int compares;
@@ -17,16 +18,16 @@ void bubble_sort(uint32_t *A, uint32_t n) {
     int swapped = 1; //true
     while (swapped) {
         swapped = 0; //false
-	for (uint32_t i = 1; i < n; i++) {
+        for (uint32_t i = 1; i < n; i++) {
             if (less_than(A[i], A[i - 1])) { // using less_than function for compares increment
                 uint32_t temp = A[i];
-		A[i] = A[i - 1];
-		A[i - 1] = temp;
-		swapped = 1;
-		moves += 3; //each swap is equivelent to 3 moves
+                A[i] = A[i - 1];
+                A[i - 1] = temp;
+                swapped = 1;
+                moves += 3; //each swap is equivelent to 3 moves
             }
-	}
-	n -= 1;
+        }
+        n -= 1;
     }
 }
 
@@ -38,4 +39,3 @@ static bool less_than(uint32_t el_1, uint32_t el_2) {
     compares += 1;
     return el_1 < el_2;
 }
-

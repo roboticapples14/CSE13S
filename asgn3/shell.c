@@ -1,7 +1,9 @@
 #include "shell.h"
+
 #include "gaps.h"
-#include <stdlib.h>
+
 #include <stdbool.h>
+#include <stdlib.h>
 
 static bool less_than(uint32_t el_1, uint32_t el_2);
 int compares;
@@ -19,21 +21,20 @@ void shell_sort(uint32_t *A, uint32_t n) {
     // for gap in gaps
     for (uint32_t gap = 0; gap < sizeof(gaps); gap++) {
         //for i in range (gap, len(A))
-	for (uint32_t i = gap; i < n; i++) {
+        for (uint32_t i = gap; i < n; i++) {
             uint32_t j = i;
-	    uint32_t temp = A[i]; //move
-	    moves += 1;
-	    while (j >= gap && less_than(temp, A[j - gap])) {
-		A[j] = A[j - gap]; //move
-		moves += 1;
-		j -= gap;
-	    }
-	    A[j] = temp; //move
-	    moves += 1;
-	}
+            uint32_t temp = A[i]; //move
+            moves += 1;
+            while (j >= gap && less_than(temp, A[j - gap])) {
+                A[j] = A[j - gap]; //move
+                moves += 1;
+                j -= gap;
+            }
+            A[j] = temp; //move
+            moves += 1;
+        }
     }
 }
-
 
 /* comparison function, created to ensure that every time comparison is completed
 that external var compares is itterated
@@ -43,4 +44,3 @@ static bool less_than(uint32_t el_1, uint32_t el_2) {
     compares += 1;
     return el_1 < el_2;
 }
-
