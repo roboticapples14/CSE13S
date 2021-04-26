@@ -108,14 +108,14 @@ static uint64_t partition(uint32_t *A, uint32_t lo, uint32_t hi) {
     
     while (i < j) {
         i += 1;
-        do { // itterate through values on left side of pivot until hitting value that's greater than pivot
+        while (less_than(A[i], pivot)) { // itterate through values on left side of pivot until hitting value that's greater than pivot
 	    i += 1;
-	} while (less_than(A[i], pivot)); // using less_than function for compares increment
+	} // using less_than function for compares increment
 	
 	j -= 1;
-	do { // itterates thru right side of pivot until value is less than pivot
+	while (less_than(pivot, A[j])) { // itterates thru right side of pivot until value is less than pivot
             j -= 1;
-	} while (less_than(pivot, A[j])); // using less_than function for compares increment
+	} // using less_than function for compares increment
 	
 	// now A[i] should be greater than A[j], so we swap them
 	// but only if index i < j

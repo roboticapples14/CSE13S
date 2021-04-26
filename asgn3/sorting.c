@@ -109,7 +109,7 @@ int main(int argc, char **argv) {
 	printf("%i elements, %i moves, %i compares\n", size, moves, compares);
         for (uint32_t j = 0; j < num_to_print; j++) {
             // newline every 5th element
-	    if (j % 5 == 0) {
+	    if (j % 5 == 0 && j != 0) { 
                 printf("\n");
 	    }
 	    printf("%13" PRIu32, arr[j]);
@@ -125,14 +125,13 @@ int main(int argc, char **argv) {
         for (uint32_t i = 0; i < size; i++) {
             arr[i] = random(); 
         }
-
+        // shell sort arr
         shell_sort(arr, size);
-	// TODO: implement moves, compares, and stack/queue size vars
-	// Use extern vars?
         printf("Shell Sort\n");
 	printf("%i elements, %i moves, %i compares\n", size, moves, compares);
         for (uint32_t j = 0; j < num_to_print; j++) {
-            if (j % 5 == 0) {
+	    // newline every 5th element, except for the first
+            if (j % 5 == 0 && j != 0) { 
                 printf("\n");
 	    }
             printf("%13" PRIu32, arr[j]);
@@ -154,10 +153,10 @@ int main(int argc, char **argv) {
         printf("Quick Sort (Stack)\n");
 	// use extern vars moves, compares to keep track of sort stats
 	printf("%i elements, %i moves, %i compares\n", size, moves, compares);
-        printf("Max stack size: %i", max_stack_size);
+        printf("Max stack size: %i\n", max_stack_size);
 	for (uint32_t j = 0; j < num_to_print; j++) {
             // newline every 5th element printed
-            if (j % 5 == 0) {
+	    if (j % 5 == 0 && j != 0) { 
                 printf("\n");
 	    }
             printf("%13" PRIu32, arr[j]);
@@ -173,27 +172,16 @@ int main(int argc, char **argv) {
         for (uint32_t i = 0; i < size; i++) {
             arr[i] = random(); 
         }
-	
-	//DEBUG PRINT
-	printf("UNSORTED ARRAY:\n");
-        for (uint32_t j = 0; j < num_to_print; j++) {
-            // newline every 5th element printed
-            if (j % 5 == 0) {
-                printf("\n");
-            }
-            printf("%13" PRIu32, arr[j]);
-        }
-        printf("\n");
 
 	// sort arr
 	quick_sort_queue(arr, size);
         printf("Quick Sort (Queue)\n");
 	// use extern vars moves, compares to keep track of sort stats
 	printf("%i elements, %i moves, %i compares\n", size, moves, compares);
-        printf("Max queue size: %i", max_queue_size);
+        printf("Max queue size: %i\n", max_queue_size);
         for (uint32_t j = 0; j < num_to_print; j++) {
             // newline every 5th element printed
-	    if (j % 5 == 0) { 
+	    if (j % 5 == 0 && j != 0) { 
                 printf("\n");
 	    }
             printf("%13" PRIu32, arr[j]);
@@ -219,4 +207,3 @@ void print_instructions() {
     printf("   -p elements     Specify number of elements to print.\n");
     printf("   -r seed         Specify random seed.\n");
 }
-
