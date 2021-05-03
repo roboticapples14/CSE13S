@@ -104,10 +104,10 @@ int main(int argc, char *argv[]) {
     current = path_create(); //current path
     shortest = path_create(); //shortest path
     calls = 0;
-    //for (int vertex = START_VERTEX; vertex < n; vertex++) {
+    for (int vertex = START_VERTEX; vertex < n; vertex++) {
         // call depth first search on all vertices
-	dfs(g, START_VERTEX, current, shortest, cities, outfile);
-    //}
+	dfs(g, vertex, current, shortest, cities, outfile);
+    }
 
     // print results
     fprintf(outfile, "Shortest path length: %d\n", path_length(shortest));
@@ -129,6 +129,7 @@ void dfs(Graph *G, uint32_t v, Path *curr, Path *shortest, char *cities[], FILE 
 	    if (path_length(shortest) == 0) { // if shortest path doesnt exist yet, copy
                 path_copy(shortest, curr);
 	    }
+	   
             // print every hamiltonian path if verbose option was chosen
             if (verbose == true) {
                 //path_push_vertex(shortest, START_VERTEX, G); // add origin to end of shortest path
@@ -142,16 +143,13 @@ void dfs(Graph *G, uint32_t v, Path *curr, Path *shortest, char *cities[], FILE 
     // for every vertex in graph that connects to v and is unvisited, call dfs on it
     for (uint32_t i = 0; i < graph_vertices(G); i++) {
         if ( graph_has_edge(G, v, i) ) { // if (v, i) is an edge
-	    if (!(graph_visited(G, i)) || (i == START_VERTEX && path_vertices(curr) == (graph_vertices(G)))) { // if vertex i hasn't been visited, or if its the origin and this is the last item
-	    
-	        if (!(graph_visited(G, i))) { // if vertex i hasn't been visited
-	            if ( (path_length(curr) <= path_length(shortest)) || path_length(shortest) == 0) {
-                        // recursive call to dfs
-                        dfs(G, i, curr, shortest, cities, outfile);
-                        calls++;
-		    }
-	        }
-            }
+	    if (!(graph_visited(G, i)) || (i == START_VERTEX && path_vertices(curr) == graph_vertices(G))) { // if vertex i hasn't been visited, or if its the origin and this is the last item
+	        if ( (path_length(curr) <= path_length(shortest)) || path_length(shortest) == 0) {
+                    // recursive call to dfs
+                    dfs(G, i, curr, shortest, cities, outfile);
+                    calls++;
+		}
+	    }
         }
     }
     graph_mark_unvisited(G, v);
