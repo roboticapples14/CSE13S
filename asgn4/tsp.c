@@ -1,5 +1,6 @@
 #include "graph.h"
 #include "path.h"
+#include "path2.h"
 #include "stack.h"
 #include "vertices.h"
 
@@ -116,6 +117,45 @@ int main(int argc, char *argv[]) {
     return 0;
 }
 
+
+// copied in from my gitlab commit 239989b3
+void dfs(Graph *G, uint32_t v, Path *curr, Path *shortest, char *cities[], FILE *outfile) {
+    extern int calls; // num of recursive calls to dfs
+    extern int verbose;
+    uint32_t pop_contents;
+    graph_mark_visited(G, v);
+    // push next vertex onto path
+    path_push_vertex(curr, v, G);
+    if (path_is_hamiltonian(curr, G)) {
+	// once we know path is hamiltonian, only valid path if connects back to start vertex
+        //if (graph_has_edge(G, v, START_VERTEX)) {
+           // path_push_vertex(curr, START_VERTEX, G); // loop back to origin vertex
+	    if (path_length(shortest) == 0) {
+                path_copy(shortest, curr);
+	    }
+	    // print every hamiltonian path if verbose option was chosen
+            if (verbose == true) {
+                path_print(curr, outfile, cities);
+            }
+            // if current path's length is shortest and shortest, copy current into shortest
+            if (path_length(curr) < path_length(shortest)) {
+                path_copy(shortest, curr);
+            }
+	//}
+    }
+    // for every vertex in graph that connects to v and is unvisited, call dfs on it
+    for (uint32_t i = 0; i < graph_vertices(G); i++) {
+        if (graph_has_edge(G, v, i) && !(graph_visited(G, v))) {
+            // recursive call to dfs
+            dfs(G, i, curr, shortest, cities, outfile);
+        }
+    }
+    graph_mark_unvisited(G, v);
+    // pop off stack after return from dfs
+    path_pop_vertex(curr, &pop_contents, G);
+}
+
+/*********
 void dfs(Graph *G, uint32_t v, Path *curr, Path *shortest, char *cities[], FILE *outfile) { 
     extern int calls; // num of recursive calls to dfs
     extern int verbose;
@@ -125,41 +165,41 @@ void dfs(Graph *G, uint32_t v, Path *curr, Path *shortest, char *cities[], FILE 
     path_push_vertex(curr, v, G);
     graph_mark_visited(G, v);
     if (path_is_hamiltonian(curr, G)) {
-        // if path can loop back to origin
-	    if (path_length(shortest) == 0) { // if shortest path doesnt exist yet, copy
-                path_copy(shortest, curr);
+	    // once we know path is hamiltonian, only a valid path if loops back to start vertex
+	    if (graph_has_edge(G, v, START_VERTEX)) {
+		path_push_vertex(curr, START_VERTEX, G);
+	        if (path_length(shortest) == 0) { // if shortest path doesnt exist yet, copy
+                    path_copy(shortest, curr);
+	        }
+                // print every hamiltonian path if verbose option was chosen
+                if (verbose == true) {
+                    path_print(curr, outfile, cities);
+                }
+                // if current path's length is shorter than shortest, copy current into shortest
+                if (path_length(curr) < path_length(shortest)) {
+	            path_copy(shortest, curr);
+                }
 	    }
-	   
-            // print every hamiltonian path if verbose option was chosen
-            if (verbose == true) {
-                //path_push_vertex(shortest, START_VERTEX, G); // add origin to end of shortest path
-                path_print(curr, outfile, cities);
-            }
-            // if current path's length is shorter than shortest, copy current into shortest
-            if (path_length(curr) < path_length(shortest)) {
-	        path_copy(shortest, curr);
-            }
     }
     // for every vertex in graph that connects to v and is unvisited, call dfs on it
     for (uint32_t i = 0; i < graph_vertices(G); i++) {
-        if ( graph_has_edge(G, v, i) ) { // if (v, i) is an edge
-	    if (!(graph_visited(G, i)) || (i == START_VERTEX && path_vertices(curr) == graph_vertices(G))) { // if vertex i hasn't been visited, or if its the origin and this is the last item
-	        if ( (path_length(curr) <= path_length(shortest)) || path_length(shortest) == 0) {
-                    // recursive call to dfs
-                    dfs(G, i, curr, shortest, cities, outfile);
-                    calls++;
-		}
-	    }
+        if (graph_has_edge(G, v, i) && !(graph_visited(G, v))) {
+	    //if ( (path_length(curr) <= path_length(shortest)) || path_length(shortest) == 0) {
+                // recursive call to dfs
+                dfs(G, i, curr, shortest, cities, outfile);
+                calls++;
+	    //}
         }
     }
-    graph_mark_unvisited(G, v);
     // pop off stack after return from dfs
     path_pop_vertex(curr, &pop_contents, G);
+    graph_mark_unvisited(G, v);
 }
+******/
 
 bool path_is_hamiltonian(Path *p, Graph *G) {
     // path is hamiltonian if number of vertices is equal to num of vertices in graph
-    return path_vertices(p) == graph_vertices(G) + 1;
+    return path_vertices(p) == graph_vertices(G);
 }
 
 void print_instructions() {
