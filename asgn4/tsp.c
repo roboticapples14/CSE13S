@@ -148,17 +148,18 @@ void dfs(Graph *G, uint32_t v, Path *curr, Path *shortest, char *cities[], FILE 
     // for every vertex in graph that connects to v and is unvisited, call dfs on it
     for (uint32_t i = 0; i < graph_vertices(G); i++) {
         if (graph_has_edge(G, v, i) && !(graph_visited(G, i))) { // if (v, i) is an edge
-            //if ( (path_length(curr) <= path_length(shortest)) || path_length(shortest) == 0) {
             // recursive call to dfs
             dfs(G, i, curr, shortest, cities, outfile);
             calls++;
-            //}
         }
     }
     // pop off stack after return from dfs
     path_pop_vertex(curr, &pop_contents, G);
     graph_mark_unvisited(G, v);
 }
+
+
+
 
 /*********
 // copied in from my gitlab commit 239989b3
