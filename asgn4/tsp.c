@@ -116,45 +116,40 @@ int main(int argc, char *argv[]) {
     return 0;
 }
 
-
-
-void dfs(Graph *G, uint32_t v, Path *curr, Path *shortest, char *cities[], FILE *outfile) { 
+void dfs(Graph *G, uint32_t v, Path *curr, Path *shortest, char *cities[], FILE *outfile) {
     extern int verbose;
     extern int calls; // num of recursive calls to dfs
     uint32_t popped_element;
     graph_mark_visited(G, v);
     path_push_vertex(curr, v, G);
 
-    if(path_is_hamiltonian(curr, G)) {
+    if (path_is_hamiltonian(curr, G)) {
         if (graph_has_edge(G, v, START_VERTEX)) {
             path_push_vertex(curr, START_VERTEX, G);
 
-	    if (path_length(shortest) == 0) {
+            if (path_length(shortest) == 0) {
                 path_copy(shortest, curr);
-	    }
-	    if (verbose == true) {
+            }
+            if (verbose == true) {
                 path_print(curr, outfile, cities);
-	    }
-	    if (path_length(curr) < path_length(shortest)) {
+            }
+            if (path_length(curr) < path_length(shortest)) {
                 path_copy(shortest, curr);
-	    }
-
-	}
+            }
+        }
     }
 
     for (uint32_t i = 0; i < graph_vertices(G); i++) {
         if (!graph_visited(G, i) && graph_has_edge(G, v, i)) {
             if (path_length(curr) <= path_length(shortest) || path_length(shortest) == 0) {
-	        dfs(G, i, curr, shortest, cities, outfile);
-	        calls++;
-	    }
-	}
+                dfs(G, i, curr, shortest, cities, outfile);
+                calls++;
+            }
+        }
     }
     graph_mark_unvisited(G, v);
     path_pop_vertex(curr, &popped_element, G);
 }
-
-
 
 bool path_is_hamiltonian(Path *p, Graph *G) {
     // path is hamiltonian if number of vertices is equal to num of vertices in graph
