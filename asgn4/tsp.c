@@ -103,7 +103,7 @@ int main(int argc, char *argv[]) {
 
     current = path_create(); //current path
     shortest = path_create(); //shortest path
-    calls = 0;
+    calls = 1;
     //for (int vertex = START_VERTEX; vertex < n; vertex++) {
     // call depth first search on all vertices
     dfs(g, START_VERTEX, current, shortest, cities, outfile);
@@ -116,129 +116,45 @@ int main(int argc, char *argv[]) {
     return 0;
 }
 
-void dfs(Graph *G, uint32_t v, Path *curr, Path *shortest, char *cities[], FILE *outfile) {
-    extern int calls; // num of recursive calls to dfs
+
+
+void dfs(Graph *G, uint32_t v, Path *curr, Path *shortest, char *cities[], FILE *outfile) { 
     extern int verbose;
-    extern int n;
-    uint32_t pop_contents;
+    extern int calls; // num of recursive calls to dfs
+    uint32_t popped_element;
     graph_mark_visited(G, v);
-    // push next vertex onto path
     path_push_vertex(curr, v, G);
-    if (path_is_hamiltonian(curr, G)) {
-        // if path can loop back to origin
+
+    if(path_is_hamiltonian(curr, G)) {
         if (graph_has_edge(G, v, START_VERTEX)) {
-            // add origin to path to loop back
             path_push_vertex(curr, START_VERTEX, G);
 
-            if (path_length(shortest) == 0) { // if shortest path doesnt exist yet, copy
-                path_copy(shortest, curr);
-            }
-
-            // print every hamiltonian path if verbose option was chosen
-            if (verbose == true) {
-                //path_push_vertex(shortest, START_VERTEX, G); // add origin to end of shortest path
-                path_print(curr, outfile, cities);
-            }
-            // if current path's length is shorter than shortest, copy current into shortest
-            if (path_length(curr) < path_length(shortest)) {
-                path_copy(shortest, curr);
-            }
-        }
-    }
-    // for every vertex in graph that connects to v and is unvisited, call dfs on it
-    for (uint32_t i = 0; i < graph_vertices(G); i++) {
-        if (graph_has_edge(G, v, i) && !(graph_visited(G, i))) { // if (v, i) is an edge
-            // recursive call to dfs
-            dfs(G, i, curr, shortest, cities, outfile);
-            calls++;
-        }
-    }
-    // pop off stack after return from dfs
-    path_pop_vertex(curr, &pop_contents, G);
-    graph_mark_unvisited(G, v);
-}
-
-
-
-
-/*********
-// copied in from my gitlab commit 239989b3
-void dfs(Graph *G, uint32_t v, Path *curr, Path *shortest, char *cities[], FILE *outfile) {
-    extern int calls; // num of recursive calls to dfs
-    extern int verbose;
-    uint32_t pop_contents;
-    graph_mark_visited(G, v);
-    // push next vertex onto path
-    path_push_vertex(curr, v, G);
-    if (path_is_hamiltonian(curr, G)) {
-	// once we know path is hamiltonian, only valid path if connects back to start vertex
-        //if (graph_has_edge(G, v, START_VERTEX)) {
-           // path_push_vertex(curr, START_VERTEX, G); // loop back to origin vertex
 	    if (path_length(shortest) == 0) {
                 path_copy(shortest, curr);
 	    }
-	    // print every hamiltonian path if verbose option was chosen
-            if (verbose == true) {
+	    if (verbose == true) {
                 path_print(curr, outfile, cities);
-            }
-            // if current path's length is shortest and shortest, copy current into shortest
-            if (path_length(curr) < path_length(shortest)) {
+	    }
+	    if (path_length(curr) < path_length(shortest)) {
                 path_copy(shortest, curr);
-            }
-	//}
+	    }
+
+	}
     }
-    // for every vertex in graph that connects to v and is unvisited, call dfs on it
+
     for (uint32_t i = 0; i < graph_vertices(G); i++) {
-        if (graph_has_edge(G, v, i) && !(graph_visited(G, v))) {
-            // recursive call to dfs
-            dfs(G, i, curr, shortest, cities, outfile);
-        }
+        if (!graph_visited(G, i) && graph_has_edge(G, v, i)) {
+            if (path_length(curr) <= path_length(shortest) || path_length(shortest) == 0) {
+	        dfs(G, i, curr, shortest, cities, outfile);
+	        calls++;
+	    }
+	}
     }
     graph_mark_unvisited(G, v);
-    // pop off stack after return from dfs
-    path_pop_vertex(curr, &pop_contents, G);
+    path_pop_vertex(curr, &popped_element, G);
 }
 
-void dfs(Graph *G, uint32_t v, Path *curr, Path *shortest, char *cities[], FILE *outfile) { 
-    extern int calls; // num of recursive calls to dfs
-    extern int verbose;
-    extern int n;
-    uint32_t pop_contents;
-    // push next vertex onto path
-    path_push_vertex(curr, v, G);
-    graph_mark_visited(G, v);
-    if (path_is_hamiltonian(curr, G)) {
-	    // once we know path is hamiltonian, only a valid path if loops back to start vertex
-	    if (graph_has_edge(G, v, START_VERTEX)) {
-		path_push_vertex(curr, START_VERTEX, G);
-	        if (path_length(shortest) == 0) { // if shortest path doesnt exist yet, copy
-                    path_copy(shortest, curr);
-	        }
-                // print every hamiltonian path if verbose option was chosen
-                if (verbose == true) {
-                    path_print(curr, outfile, cities);
-                }
-                // if current path's length is shorter than shortest, copy current into shortest
-                if (path_length(curr) < path_length(shortest)) {
-	            path_copy(shortest, curr);
-                }
-	    }
-    }
-    // for every vertex in graph that connects to v and is unvisited, call dfs on it
-    for (uint32_t i = 0; i < graph_vertices(G); i++) {
-        if (graph_has_edge(G, v, i) && !(graph_visited(G, v))) {
-	    //if ( (path_length(curr) <= path_length(shortest)) || path_length(shortest) == 0) {
-                // recursive call to dfs
-                dfs(G, i, curr, shortest, cities, outfile);
-                calls++;
-	    //}
-        }
-    }
-    // pop off stack after return from dfs
-    path_pop_vertex(curr, &pop_contents, G);
-    graph_mark_unvisited(G, v);
-}
-******/
+
 
 bool path_is_hamiltonian(Path *p, Graph *G) {
     // path is hamiltonian if number of vertices is equal to num of vertices in graph
