@@ -18,21 +18,22 @@ void dfs(Graph *G, uint32_t v, Path *curr, Path *shortest, char *cities[], FILE 
 bool path_is_hamiltonian(Path *p, Graph *G);
 void print_instructions();
 int verbose;
+int calls;
+int n;
 
 int main(int argc, char *argv[]) {
     int opt = 0;
     FILE *infile = stdin;
     FILE *outfile = stdout;
-    char *cities[VERTICES]; // array to hold city names, length of max amount of possible vertices
     char buffer[BLOCK];
     int help = 0;
     int undirected = 0;
     int infile_given = 0;
     int outfile_given = 0;
-    int calls = 0; // number of recursive calls to dfs
-    int n; // number of cities given in infile
     int c; // where lines are stored
     extern int verbose;
+    extern int calls; // num of recursive calls to dfs
+    extern int n; // num of cities
     Path *current; //current path
     Path *shortest; //shortest path
     Graph *g; // create graph g of len n to populate with graph
@@ -40,7 +41,6 @@ int main(int argc, char *argv[]) {
 
     //user input loop
     while ((opt = getopt(argc, argv, OPTIONS)) != -1) {
-        assert(1 == 0);
         // help menu
         if (opt == 'h') {
             help = 1;
@@ -57,7 +57,7 @@ int main(int argc, char *argv[]) {
         if (opt == 'i') {
             infile_given = 1;
             infile = fopen(optarg, "r"); //r for read
-            if (infile == NULL) {
+	    if (infile == NULL) {
                 fprintf(stderr, "failed to open input file");
                 return 1;
             }
@@ -81,76 +81,87 @@ int main(int argc, char *argv[]) {
     }
 
     // once input options are determined, read first line
-    c = fscanf(infile, "%i", &n); // set n to int on first line
-    // for number of cities, read in name and store in cities array
+    c = fscanf(infile, "%i\n", &n); // set n to int on first line 
+    char *cities[n]; // array to hold city names, length of num of vertices
+    // read in n city names
     for (int i = 0; i < n; i++) {
-        fgets(buffer, BLOCK, infile); // using fgets to store city name into city
-        cities[i][strlen(cities[i]) - 1] = '\0'; //change last char from \n to \0 -> NEEDED FOR fgets()
-    }
-    int i, j, k;
-    g = graph_create(n, undirected); // create graph g of len n to populate with graph
-    // while ! end of file, read in next edge and add to graph g
-    while ((c = fscanf(infile, "%i %i %i", &i, &j, &k)) != EOF) {
-        if (c != 3) {
-            printf("malformed line\n");
-            return 1;
-        }
-        graph_add_edge(g, i, j, k); // add given edge to graph g
+	fscanf(infile, "%s\n", buffer); // use fscanf instead of fgets to avoid newline problem
+	cities[i] = strdup(buffer);
     }
 
+    fscanf(infile, "");
+    int vertex1, vertex2, weight; // i = vertex 1, j = vertex 2, k = weight
+    g = graph_create(n, undirected); // create graph g of len n to populate with graph
+    // read in edges and add to graph g
+    while ((c = fscanf(infile, "%i %i %i\n", &vertex1, &vertex2, &weight)) != EOF) {
+	if (c != 3) {
+	    printf("malformed line\n");
+	    return 1;
+	}
+        graph_add_edge(g, vertex1, vertex2, weight); // add given edge to graph g
+    }    
+    
     current = path_create(); //current path
     shortest = path_create(); //shortest path
-    for (int vertex = START_VERTEX; vertex < n; vertex++) {
-        // if outfile given, call dfs with outfile as file param
-	if(outfile_given) {
-            // call depth first search on all vertices
-	    dfs(g, vertex, current, shortest, cities, outfile);
-	}
-        // if outfile NOT given, call dfs with stdout as default output
-	else {
-            // call depth first search on all vertices
-	    dfs(g, vertex, current, shortest, cities, stdout);
-	}
-    }
+    calls = 0;
+    //for (int vertex = START_VERTEX; vertex < n; vertex++) {
+        // call depth first search on all vertices
+	dfs(g, START_VERTEX, current, shortest, cities, outfile);
+    //}
 
     // print results
-    // TODO: print results to stdout if no outfile specified
-    fprintf(outfile, "Shortest path length: %d", path_length(shortest));
+    fprintf(outfile, "Shortest path length: %d\n", path_length(shortest));
     path_print(shortest, outfile, cities);
-    fprintf(outfile, "Number of recursive calls: %d", calls); // number of calls
+    fprintf(outfile, "Number of recursive calls: %d\n", calls); // number of calls
     return 0;
 }
 
-void dfs(Graph *G, uint32_t v, Path *curr, Path *shortest, char *cities[], FILE *outfile) {
+void dfs(Graph *G, uint32_t v, Path *curr, Path *shortest, char *cities[], FILE *outfile) { 
+    extern int calls; // num of recursive calls to dfs
+    extern int verbose;
+    extern int n;
+    uint32_t pop_contents;
+    // push next vertex onto path
+    path_push_vertex(curr, v, G);
     graph_mark_visited(G, v);
     if (path_is_hamiltonian(curr, G)) {
-        // print every hamiltonian path if verbose option was chosen
-        if (verbose == true) {
-            path_print(curr, outfile, cities);
-        }
-        // if current path's length is shortest and shortest, copy current into shortest
-        if (path_length(curr) < path_length(shortest)) {
-            path_copy(shortest, curr);
-        }
+        // if path can loop back to origin
+	    if (path_length(shortest) == 0) { // if shortest path doesnt exist yet, copy
+                path_copy(shortest, curr);
+	    }
+            // print every hamiltonian path if verbose option was chosen
+            if (verbose == true) {
+                //path_push_vertex(shortest, START_VERTEX, G); // add origin to end of shortest path
+                path_print(curr, outfile, cities);
+            }
+            // if current path's length is shorter than shortest, copy current into shortest
+            if (path_length(curr) < path_length(shortest)) {
+	        path_copy(shortest, curr);
+            }
     }
     // for every vertex in graph that connects to v and is unvisited, call dfs on it
     for (uint32_t i = 0; i < graph_vertices(G); i++) {
-        if (graph_has_edge(G, v, i) && !(graph_visited(G, v))) {
-            uint32_t pop_contents;
-            // push next vertex onto path
-            path_push_vertex(curr, i, G);
-            // recursive call to dfs
-            dfs(G, i, curr, shortest, cities, outfile);
-            // pop off stack after return from dfs
-            path_pop_vertex(curr, &pop_contents, G);
+        if ( graph_has_edge(G, v, i) ) { // if (v, i) is an edge
+	    if (!(graph_visited(G, i)) || (i == START_VERTEX && path_vertices(curr) == (graph_vertices(G)))) { // if vertex i hasn't been visited, or if its the origin and this is the last item
+	    
+	        if (!(graph_visited(G, i))) { // if vertex i hasn't been visited
+	            if ( (path_length(curr) <= path_length(shortest)) || path_length(shortest) == 0) {
+                        // recursive call to dfs
+                        dfs(G, i, curr, shortest, cities, outfile);
+                        calls++;
+		    }
+	        }
+            }
         }
     }
     graph_mark_unvisited(G, v);
+    // pop off stack after return from dfs
+    path_pop_vertex(curr, &pop_contents, G);
 }
 
 bool path_is_hamiltonian(Path *p, Graph *G) {
     // path is hamiltonian if number of vertices is equal to num of vertices in graph
-    return path_vertices(p) == graph_vertices(G);
+    return path_vertices(p) == graph_vertices(G) + 1;
 }
 
 void print_instructions() {
