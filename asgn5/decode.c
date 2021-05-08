@@ -10,7 +10,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-
+#include <sys/stat.h>
 
 // h = help, i = infile, o = outfile
 #define OPTIONS "hi:o:"
@@ -26,16 +26,15 @@ uint8_t Ht_arr[] = {0, 1, 1, 1,
 		    0, 1, 0, 0,
 		    0, 0, 1, 0,
 		    0, 0, 0, 1};
-int total_bytes;
 
 int main(int argc, char *argv[]) {
     int opt = 0; 
     FILE *infile = stdin;
     FILE *outfile = stdout;
-    extern int total_bytes;		// total bytes read
-    extern int corrected_bytes; 	// num of corrected error bits
-    extern int uncorrected_bytes;	// num of uncorrected error bits
-    extern int error_rate;		// rate of uncorrected errors for given input
+    int total_bytes;		// total bytes read
+    int corrected_bytes; 	// num of corrected error bits
+    int uncorrected_bytes;	// num of uncorrected error bits
+    int error_rate;		// rate of uncorrected errors for given input
     int help = 0;
     int verbose = 0;
     int infile_given = 0;
@@ -69,7 +68,7 @@ int main(int argc, char *argv[]) {
         // provided input file
         if (opt == 'i') {
             infile_given = 1;
-            infile = fopen(optarg, "r"); //r for read
+            infile = fopen(optarg, "rb"); //r for read
             if (infile == NULL) {
                 fprintf(stderr, "failed to open input file");
                 return 1;
@@ -78,7 +77,7 @@ int main(int argc, char *argv[]) {
         // provided output file
         if (opt == 'o') {
             outfile_given = 1;
-            outfile = fopen(optarg, "w"); //w for write
+            outfile = fopen(optarg, "wb"); //w for write
             if (outfile == NULL) {
                 fprintf(stderr, "failed to open output file");
                 return 1;
@@ -88,6 +87,13 @@ int main(int argc, char *argv[]) {
         if (opt == 'v') {
             verbose = 1;
         }
+    }
+
+    if (infile_given) {
+         //  Getting  and  setting  file  permissions
+	 struct  stat  statbuf;
+	 fstat(fileno(infile), &statbuf);
+	 fchmod(fileno(outfile), statbuf.st_mode);
     }
 
     //TODO: Transfer file permissions from infile to outfile
@@ -112,7 +118,8 @@ int main(int argc, char *argv[]) {
             uncorrected_bytes += 1;
 	}	
 	
-	fputc(decode_full, outfile);
+	//fputc(decode_full, outfile);
+	printf("%8" PRIu8, decode_full);
 	total_bytes += 1;
     }
     return 0;

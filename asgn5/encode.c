@@ -10,6 +10,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <sys/stat.h>
 
 
 // h = help, i = infile, o = outfile
@@ -71,14 +72,25 @@ int main(int argc, char *argv[]) {
         }
     }
 
+    if (infile_given) {
+         //  Getting  and  setting  file  permissions
+	 struct  stat  statbuf;
+         fstat(fileno(infile), &statbuf);
+         fchmod(fileno(outfile), statbuf.st_mode);
+    }
+
+
     //TODO: Transfer file permissions from infile to outfile
     while ((input_byte = fgetc(infile)) != EOF) {
         uint8_t lower = lower_nibble(input_byte);
 	uint8_t upper = upper_nibble(input_byte);
 	uint8_t code_lower = ham_encode(G, lower);
-	fputc(code_lower, outfile);
+	//fputc(code_lower, outfile);
+	printf("%" PRIu8, code_lower);
 	uint8_t code_upper = ham_encode(G, upper);
-	fputc(code_upper, outfile);
+	//fputc(code_upper, outfile);
+	printf("%" PRIu8, code_upper);
+
     }
 
     return 0;

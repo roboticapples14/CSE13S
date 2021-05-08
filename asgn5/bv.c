@@ -10,22 +10,18 @@ struct  BitVector {
 };
 
 BitVector *bv_create(uint32_t length) {
-    BitVector *bv = (BitVector*) calloc(1, sizeof(BitVector)); // 1 refers to 1 byte
-    if (!bv) { // error if bv allocated incorrectly
+    BitVector *v = (BitVector*) calloc(1, sizeof(BitVector)); // 1 refers to 1 byte
+    if (!v) {
         return NULL;
     }
-    bv->length = length;
+    v->length = length;
     // if not divisible by 8, needs 1 extra byte to hold length
     int val = length % 8 == 0 ? length / 8 : length / 8 + 1;
-    bv->vector = (uint8_t*) calloc(val, sizeof(uint8_t)); // length is in bits, need to convert to bytes
-    // initialize each bit in bit vector to 0
-    for (uint32_t i = 0; i < length; i++) {
-        bv->vector[i] = 0;
+    v->vector = (uint8_t *) calloc(val, sizeof(uint8_t)); // length is in bits, need to convert to bytes
+    if (!v->vector) {
+       return NULL;
     }
-    if (!bv->vector) { // error if bv allocated incorrectly
-        return NULL;
-    }
-    return bv;
+    return v;
 }
 
 // frees memory allocated for BitVector
