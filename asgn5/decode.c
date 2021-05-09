@@ -15,8 +15,6 @@
 // h = help, i = infile, o = outfile
 #define OPTIONS "hvi:o:"
 
-uint8_t lower_nibble(uint8_t val);
-uint8_t upper_nibble(uint8_t val);
 void print_instructions();
 uint8_t Ht_arr[] = { 0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0,
     1, 0, 0, 0, 0, 1 };
@@ -93,26 +91,45 @@ int main(int argc, char *argv[]) {
     }
 
     // Transfer file permissions from infile to outfile
-    if (infile_given) {
-        //  Getting  and  setting  file  permissions
+    if (infile_given && outfile_given) {
         struct stat statbuf;
         fstat(fileno(infile), &statbuf);
         fchmod(fileno(outfile), statbuf.st_mode);
     }
 
+    uint8_t byte1; // holds lower nibble of decrypted byte
+    uint8_t byte2; // holds upper nibble of decrypted byte
+    int loop_counter = 0;
+    uint8_t full_decrypted_byte;
     while ((input_byte = fgetc(infile)) != EOF) {
-        uint8_t msg; // where corrected message returns to
-        HAM_STATUS status = ham_decode(Ht, input_byte, &msg);
+	HAM_STATUS status;
+        // if loop counter is even, load decoded msg nibble into byte1, otherwise byte2
+	if (loop_counter % 2 == 0) {
+	    status = ham_decode(Ht, input_byte, &byte1);
+	}
+	else {
+	    status = ham_decode(Ht, input_byte, &byte2);
+	    // only pack and print full byte once both upper and lower nibble have been retrieved
+	    full_decrypted_byte = pack_byte(byte2, byte1);
+            fputc(full_decrypted_byte, outfile);
+            //printf("%" PRIu8, full_decrypted_byte);
+	}
+
+
         if (status == HAM_CORRECT) {
             corrected_bytes += 1;
         } else if (status == HAM_ERR) {
             uncorrected_bytes += 1;
         }
 
-        fputc(msg, outfile);
-        //printf("%1" PRIu8, msg);
         total_bytes += 1;
+	loop_counter += 1;
     }
+    
+
+    fprintf(outfile, "\n");
+
+
 
     if (verbose) {
         //fputc(...);

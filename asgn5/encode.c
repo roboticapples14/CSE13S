@@ -75,14 +75,13 @@ int main(int argc, char *argv[]) {
         print_instructions();
 	return 1;
     }
-    if (infile_given) {
-        //  Getting  and  setting  file  permissions
+    //  Getting  and  setting  file  permissions
+    if (infile_given && outfile_given) {
         struct stat statbuf;
         fstat(fileno(infile), &statbuf);
         fchmod(fileno(outfile), statbuf.st_mode);
     }
 
-    //TODO: Transfer file permissions from infile to outfile
     while ((input_byte = fgetc(infile)) != EOF) {
         uint8_t lower = lower_nibble(input_byte);
         uint8_t upper = upper_nibble(input_byte);
