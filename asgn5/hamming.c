@@ -50,8 +50,10 @@ HAM_STATUS ham_decode(BitMatrix *Ht, uint8_t code, uint8_t *msg) {
     
     // indexes the lookup table with err syndrome
     int lookup_code = lookup[err_syndrome];
-    printf("error syndrome: %" PRIu8, err_syndrome);    
-    printf("\nlookup code: %i\n", lookup_code);
+    
+    // FOR DECODING:
+    //printf("error syndrome: %" PRIu8 "\n", err_syndrome);    
+    //printf("lookup code: %i\n", lookup_code);
 
     if (lookup_code == -3) {
         status = HAM_OK;
@@ -65,7 +67,7 @@ HAM_STATUS ham_decode(BitMatrix *Ht, uint8_t code, uint8_t *msg) {
     else {
         // if the error bit is currently 1, clear it to 0
         if (bm_get_bit(code_matrix, 0, lookup_code) == 1) {
-            bm_clr_bit(code_matrix, lookup_code / 8, lookup_code % 8);
+            bm_clr_bit(code_matrix, 0, lookup_code % 8);
         }
         // else if the error bit is currently 0, set it to 1
         else {

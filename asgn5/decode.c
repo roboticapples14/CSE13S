@@ -13,7 +13,7 @@
 #include <unistd.h>
 
 // h = help, i = infile, o = outfile
-#define OPTIONS "hi:o:"
+#define OPTIONS "hvi:o:"
 
 uint8_t lower_nibble(uint8_t val);
 uint8_t upper_nibble(uint8_t val);
@@ -81,6 +81,15 @@ int main(int argc, char *argv[]) {
         if (opt == 'v') {
             verbose = 1;
         }
+	if (opt != 'o' && opt != 'i' && opt != 'h' && opt != 'v') {
+            print_instructions();
+            return 1;
+        }
+    }
+
+    if (help) {
+        print_instructions();
+        return 1;
     }
 
     // Transfer file permissions from infile to outfile
@@ -92,26 +101,16 @@ int main(int argc, char *argv[]) {
     }
 
     while ((input_byte = fgetc(infile)) != EOF) {
-        uint8_t lower_msg;
-        uint8_t upper_msg;
-        uint8_t lower = lower_nibble(input_byte);
-        uint8_t upper = upper_nibble(input_byte);
-        HAM_STATUS lower_status = ham_decode(Ht, lower, &lower_msg);
-        HAM_STATUS upper_status = ham_decode(Ht, upper, &upper_msg);
-        uint8_t decode_full = pack_byte(upper_msg, lower_msg);
-        if (lower_status == HAM_CORRECT) {
+        uint8_t msg; // where corrected message returns to
+        HAM_STATUS status = ham_decode(Ht, input_byte, &msg);
+        if (status == HAM_CORRECT) {
             corrected_bytes += 1;
-        } else if (lower_status == HAM_ERR) {
+        } else if (status == HAM_ERR) {
             uncorrected_bytes += 1;
         }
-        if (upper_status == HAM_CORRECT) {
-            corrected_bytes += 1;
-        } else if (upper_status == HAM_ERR) {
-            corrected_bytes += 1;
-        }
 
-        //fputc(decode_full, outfile);
-        printf("%1" PRIu8, decode_full);
+        fputc(msg, outfile);
+        //printf("%1" PRIu8, msg);
         total_bytes += 1;
     }
 
@@ -123,7 +122,30 @@ int main(int argc, char *argv[]) {
         printf("Corrected errors: %i\n", corrected_bytes);
         printf("Error rate: %i\n", error_rate);
     }
-
+    
+    // close any opened files
+    if (infile_given) {
+        fclose(infile);
+    }
+    if (outfile_given) {
+       fclose(outfile);
+    }
+    // free allocated data
+    bm_delete(&Ht);
 
     return 0;
 }
+
+void print_instructions() {
+    // Instructions
+    printf("SYNOPSIS\n");
+    printf("  A Hamming(8, 4) systematic code decoder.\n\n");
+    printf("USAGE\n");
+    printf("  ./decode [-h] [-v] [-i infile] [-o outfile]\n\n");
+    printf("OPTIONS\n");
+    printf("  -h             Program usage and help.\n");
+    printf("  -v             Print statistics of decoding to stderr.\n");
+    printf("  -i infile      Input data to encode.\n");
+    printf("  -o outfile     Output of encoded data.\n");
+}
+

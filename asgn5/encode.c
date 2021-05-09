@@ -66,8 +66,15 @@ int main(int argc, char *argv[]) {
                 return 1;
             }
         }
+	if (opt != 'o' && opt != 'i' && opt != 'h') {
+            print_instructions();
+	    return 1;
+	}
     }
-
+    if (help) {
+        print_instructions();
+	return 1;
+    }
     if (infile_given) {
         //  Getting  and  setting  file  permissions
         struct stat statbuf;
@@ -98,4 +105,17 @@ int main(int argc, char *argv[]) {
     bm_delete(&G);
 
     return 0;
+}
+
+
+void print_instructions() {
+    // Instructions
+    printf("SYNOPSIS\n");
+    printf("  A Hamming(8, 4) systematic code generator.\n\n");
+    printf("USAGE\n");
+    printf("  ./encode [-h] [-i infile] [-o outfile]\n\n");
+    printf("OPTIONS\n");
+    printf("  -h             Program usage and help.");
+    printf("  -i infile      Input data to encode.\n");
+    printf("  -o outfile     Output of encoded data.\n");
 }

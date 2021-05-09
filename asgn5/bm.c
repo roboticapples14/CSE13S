@@ -14,7 +14,7 @@ struct BitMatrix {
 };
 
 BitMatrix *bm_create(uint32_t rows, uint32_t cols) {
-    int val = (rows * cols) % 8 == 0 ? (rows * cols) / 8 : (rows * cols) / 8 + 1;
+    int val = (rows * cols) % 8 == 0 ? (rows * cols) / 8 : ((rows * cols) / 8) + 1;
     BitMatrix *bm = (BitMatrix *) calloc(val, sizeof(BitMatrix)); // size in bytes
     if (!bm) {
         return NULL;
@@ -79,8 +79,8 @@ uint8_t bm_to_data(BitMatrix *m) {
     uint8_t msg = 0;
     for (uint32_t i = 0; i < m->rows; i++) {
         for (uint32_t j = 0; j < m->cols; j++) {
-            msg |= bm_get_bit(m, i, j); // OR msg with bit at position (i, j)
-            msg = msg << 1; // shift msg over 1 bit
+	    // OR msg with bit at position (i, j)
+	    msg |= (bm_get_bit(m, i, j) << (i * m->cols + j)); 
         }
     }
     return msg;

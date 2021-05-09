@@ -28,7 +28,6 @@ BitVector *bv_create(uint32_t length) {
 
 // frees memory allocated for BitVector
 void bv_delete(BitVector **v) {
-    // TODO: fix err
     free((*v)->vector);
     free(*v);
     *v = NULL;
