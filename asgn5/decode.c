@@ -26,7 +26,7 @@ int main(int argc, char *argv[]) {
     int total_bytes; // total bytes read
     int corrected_bytes; // num of corrected error bits
     int uncorrected_bytes; // num of uncorrected error bits
-    int error_rate; // rate of uncorrected errors for given input
+    double error_rate; // rate of uncorrected errors for given input
     int help = 0;
     int verbose = 0;
     int infile_given = 0;
@@ -99,45 +99,45 @@ int main(int argc, char *argv[]) {
 
     uint8_t byte1; // holds lower nibble of decrypted byte
     uint8_t byte2; // holds upper nibble of decrypted byte
-    int loop_counter = 0;
     uint8_t full_decrypted_byte;
-    while ((input_byte = fgetc(infile)) != EOF) {
+    while (!(feof(infile))) {
 	HAM_STATUS status;
-        // if loop counter is even, load decoded msg nibble into byte1, otherwise byte2
-	if (loop_counter % 2 == 0) {
-	    status = ham_decode(Ht, input_byte, &byte1);
-	}
-	else {
-	    status = ham_decode(Ht, input_byte, &byte2);
-	    // only pack and print full byte once both upper and lower nibble have been retrieved
-	    full_decrypted_byte = pack_byte(byte2, byte1);
-            fputc(full_decrypted_byte, outfile);
-            //printf("%" PRIu8, full_decrypted_byte);
-	}
-
-
-        if (status == HAM_CORRECT) {
-            corrected_bytes += 1;
-        } else if (status == HAM_ERR) {
+	input_byte = fgetc(infile);
+        status = ham_decode(Ht, input_byte, &byte1);
+	if (status == HAM_ERR) {
             uncorrected_bytes += 1;
-        }
-
+	}
+	else if (status == HAM_CORRECT) {
+            corrected_bytes += 1;
+	}
         total_bytes += 1;
-	loop_counter += 1;
+	
+	input_byte = fgetc(infile);
+	status = ham_decode(Ht, input_byte, &byte2);
+	if (status == HAM_ERR) {
+            uncorrected_bytes += 1;
+	}
+	else if (status == HAM_CORRECT) {
+            corrected_bytes += 1;
+	}
+        
+	full_decrypted_byte = pack_byte(byte2, byte1);
+	fputc(full_decrypted_byte, outfile);
+        total_bytes += 1;
     }
     
 
-    fprintf(outfile, "\n");
+    //fprintf(outfile, "\n");
 
 
-
+    error_rate = (float) uncorrected_bytes / (float) total_bytes;
     if (verbose) {
         //fputc(...);
-        printf("\n");
-        printf("Total bytes processed: %i\n", total_bytes);
-        printf("Uncorrected errors: %i\n", uncorrected_bytes);
-        printf("Corrected errors: %i\n", corrected_bytes);
-        printf("Error rate: %i\n", error_rate);
+        fprintf(outfile, "\n");
+        fprintf(outfile, "Total bytes processed: %i\n", total_bytes);
+        fprintf(outfile, "Uncorrected errors: %i\n", uncorrected_bytes);
+        fprintf(outfile, "Corrected errors: %i\n", corrected_bytes);
+        fprintf(outfile, "Error rate: %f\n", error_rate);
     }
     
     // close any opened files
