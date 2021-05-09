@@ -1,22 +1,34 @@
 CC = clang
 CFLAGS = -Wall -Wextra  -Werror  -Wpedantic
 
-all: encode decode
+all: encode decode error entropy
 
-tsp: tsp.o graph.o path.o stack.o
-        $(CC) -o tsp tsp.o graph.o path.o stack.o -lm
+encode: encode.o bv.o bm.o hamming.o
+	$(CC) -o encode encode.o bv.o bm.o hamming.o -lm
 
-tsp.o: tsp.c
-        $(CC) $(CFLAGS) -c tsp.c
+decode: decode.o bv.o bm.o hamming.o
+	$(CC) -o decode decode.o bv.o bm.o hamming.o -lm
 
-graph.o: graph.c
-        $(CC) $(CFLAGS) -c graph.c
+error: error.o
+	$(CC) -o error error.o -lm
 
-path.o: path.c
-        $(CC) $(CFLAGS) -c path.c
+entropy: entropy.o
+	$(CC) -o entropy entropy.o -lm
 
-stack.o: stack.c
-        $(CC) $(CFLAGS) -c stack.c
+encode.o: encode.c
+	$(CC) $(CFLAGS) -c encode.c
+
+decode.o: decode.c
+	$(CC) $(CFLAGS) -c decode.c
+
+bv.o: bv.c
+	$(CC) $(CFLAGS) -c bv.c
+
+bm.o: bm.c
+	$(CC) $(CFLAGS) -c bm.c
+
+hamming.o: hamming.c
+	$(CC) $(CFLAGS) -c hamming.c
 
 clean:
 	rm -f *.o tsp
@@ -28,5 +40,4 @@ clang-format:
 	clang-format -i -style=file *.h *.c
 
 scan -build: clean
-        scan -build  make
-
+	scan -build  make
