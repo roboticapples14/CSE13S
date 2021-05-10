@@ -122,18 +122,20 @@ int main(int argc, char *argv[]) {
 	}
         
 	full_decrypted_byte = pack_byte(byte2, byte1);
+	if ((char) full_decrypted_byte == EOF) {
+            break;
+	}
 	fputc(full_decrypted_byte, outfile);
         total_bytes += 1;
     }
     
 
-    //fprintf(outfile, "\n");
+    fprintf(outfile, "\n");
 
 
     error_rate = (float) uncorrected_bytes / (float) total_bytes;
     if (verbose) {
         //fputc(...);
-        fprintf(outfile, "\n");
         fprintf(outfile, "Total bytes processed: %i\n", total_bytes);
         fprintf(outfile, "Uncorrected errors: %i\n", uncorrected_bytes);
         fprintf(outfile, "Corrected errors: %i\n", corrected_bytes);
