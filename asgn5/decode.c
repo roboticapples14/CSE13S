@@ -79,7 +79,7 @@ int main(int argc, char *argv[]) {
         if (opt == 'v') {
             verbose = 1;
         }
-	if (opt != 'o' && opt != 'i' && opt != 'h' && opt != 'v') {
+        if (opt != 'o' && opt != 'i' && opt != 'h' && opt != 'v') {
             print_instructions();
             return 1;
         }
@@ -101,37 +101,33 @@ int main(int argc, char *argv[]) {
     uint8_t byte2; // holds upper nibble of decrypted byte
     uint8_t full_decrypted_byte;
     while (!(feof(infile))) {
-	HAM_STATUS status;
-	input_byte = fgetc(infile);
+        HAM_STATUS status;
+        input_byte = fgetc(infile);
         status = ham_decode(Ht, input_byte, &byte1);
-	if (status == HAM_ERR) {
+        if (status == HAM_ERR) {
             uncorrected_bytes += 1;
-	}
-	else if (status == HAM_CORRECT) {
+        } else if (status == HAM_CORRECT) {
             corrected_bytes += 1;
-	}
+        }
         total_bytes += 1;
-	
-	input_byte = fgetc(infile);
-	status = ham_decode(Ht, input_byte, &byte2);
-	if (status == HAM_ERR) {
+
+        input_byte = fgetc(infile);
+        status = ham_decode(Ht, input_byte, &byte2);
+        if (status == HAM_ERR) {
             uncorrected_bytes += 1;
-	}
-	else if (status == HAM_CORRECT) {
+        } else if (status == HAM_CORRECT) {
             corrected_bytes += 1;
-	}
-        
-	full_decrypted_byte = pack_byte(byte2, byte1);
-	if ((char) full_decrypted_byte == EOF) {
+        }
+
+        full_decrypted_byte = pack_byte(byte2, byte1);
+        if ((char) full_decrypted_byte == EOF) {
             break;
-	}
-	fputc(full_decrypted_byte, outfile);
+        }
+        fputc(full_decrypted_byte, outfile);
         total_bytes += 1;
     }
-    
 
     fprintf(outfile, "\n");
-
 
     error_rate = (float) uncorrected_bytes / (float) total_bytes;
     if (verbose) {
@@ -141,13 +137,13 @@ int main(int argc, char *argv[]) {
         fprintf(outfile, "Corrected errors: %i\n", corrected_bytes);
         fprintf(outfile, "Error rate: %f\n", error_rate);
     }
-    
+
     // close any opened files
     if (infile_given) {
         fclose(infile);
     }
     if (outfile_given) {
-       fclose(outfile);
+        fclose(outfile);
     }
     // free allocated data
     bm_delete(&Ht);
@@ -167,4 +163,3 @@ void print_instructions() {
     printf("  -i infile      Input data to encode.\n");
     printf("  -o outfile     Output of encoded data.\n");
 }
-

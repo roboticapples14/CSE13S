@@ -66,14 +66,14 @@ int main(int argc, char *argv[]) {
                 return 1;
             }
         }
-	if (opt != 'o' && opt != 'i' && opt != 'h') {
+        if (opt != 'o' && opt != 'i' && opt != 'h') {
             print_instructions();
-	    return 1;
-	}
+            return 1;
+        }
     }
     if (help) {
         print_instructions();
-	return 1;
+        return 1;
     }
     //  Getting  and  setting  file  permissions
     if (infile_given && outfile_given) {
@@ -92,20 +92,19 @@ int main(int argc, char *argv[]) {
         fputc(code_upper, outfile);
         //printf("%" PRIu8, code_upper);
     }
-    
+
     // close any opened files
     if (infile_given) {
         fclose(infile);
     }
     if (outfile_given) {
-       fclose(outfile);
+        fclose(outfile);
     }
     // free allocated data
     bm_delete(&G);
 
     return 0;
 }
-
 
 void print_instructions() {
     // Instructions

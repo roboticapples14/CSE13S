@@ -44,15 +44,15 @@ HAM_STATUS ham_decode(BitMatrix *Ht, uint8_t code, uint8_t *msg) {
     uint8_t err_syndrome;
 
     BitMatrix *code_matrix = bm_from_data(code, 8);
-    
+
     // error syndrome = data of code_matrix * h^(transposed)
     err_syndrome = bm_to_data(bm_multiply(code_matrix, Ht));
-    
+
     // indexes the lookup table with err syndrome
     int lookup_code = lookup[err_syndrome];
-    
+
     // FOR DECODING:
-    //printf("error syndrome: %" PRIu8 "\n", err_syndrome);    
+    //printf("error syndrome: %" PRIu8 "\n", err_syndrome);
     //printf("lookup code: %i\n", lookup_code);
 
     if (lookup_code == -3) {

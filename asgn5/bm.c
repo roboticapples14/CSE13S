@@ -79,8 +79,8 @@ uint8_t bm_to_data(BitMatrix *m) {
     uint8_t msg = 0;
     for (uint32_t i = 0; i < m->rows; i++) {
         for (uint32_t j = 0; j < m->cols; j++) {
-	    // OR msg with bit at position (i, j)
-	    msg |= (bm_get_bit(m, i, j) << (i * m->cols + j)); 
+            // OR msg with bit at position (i, j)
+            msg |= (bm_get_bit(m, i, j) << (i * m->cols + j));
         }
     }
     return msg;
