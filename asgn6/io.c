@@ -26,6 +26,7 @@ bool read_bit(int infile, uint8_t *bit) {
     // when buffer !full, fill it
 }
 
+//TODO: FINISH/test
 // each bit in code c buffered until buffer is full, then write out entire buffer
 void write_code(int outfile, Code *c) {
     for (int i = 0; i < c->top; i++) {

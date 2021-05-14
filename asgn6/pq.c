@@ -52,17 +52,15 @@ bool enqueue(PriorityQueue *q, Node *n) {
 	// insert n to tail of queue
         q->nodes[q->tail] = *n; 	// add n to end of queue
 	q->size += 1;			// increment size
-	q->tail = (q->tail + 1) % q->capacity; // increment tail in circular queue
         // while at least 1 more element in front of tail and element n is smaller than element ahead of it
 	int j = q->tail;
-	while (((abs(q->tail - q->head)) >= 1) && ((q->nodes[j]).frequency < (q->nodes[j - 1]).frequency)) {
+	while (((j - q->head) >= 1) && ((q->nodes[j]).frequency < (q->nodes[j - 1]).frequency)) {
             // swap n with item ahead of it in array if smaller
-	    Node *temp = node_create(" ", 0);
-            temp = &(q->nodes[j]);
             q->nodes[j] = q->nodes[j - 1];
-            q->nodes[j - 1] = *temp;
+            q->nodes[j - 1] = *n;
 	    j--;
 	}
+	q->tail = (q->tail + 1) % q->capacity; // increment tail in circular queue
 	return true;
     }
 }

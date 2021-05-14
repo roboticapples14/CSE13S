@@ -3,7 +3,32 @@
 
 
 Node *build_tree(uint64_t hist[static ALPHABET]) {
+    // create priority queue
+    PriorityQueue *pq = pq_create(ALPHABET);
+    for (int i = 0; i < ALPHABET; i++) {
+        // if frequency > 0, add node to pq
+	if (hist[i] < 0) {
+	    // create node w character at index and cooresponding frequency
+            Node *n = node_create(i, hist[i]);
+	    // enqueue node
+	    enqueue(pq, n);
+	}
+    }
 
+    // construct Huffman tree from priority queue
+    while (pq_size(pq) >= 2) {
+	// create 2 placeholder nodes to dequeue into
+	Node *l = node_create(' ', 0);
+	Node *r = node_create(' ', 0);
+	dequeue(pq, &l);
+	dequeue(pq, &r);
+	Node *parent = node_join(l, r);
+	enqueue(pq, parent);
+    }
+    // dequeue root and return it
+    Node *root = node_create(' ', 0);
+    dequeue(pq, &root);
+    return root;
 }
 
 void build_codes(Node *root, Code table[static ALPHABET]) {
@@ -11,7 +36,7 @@ void build_codes(Node *root, Code table[static ALPHABET]) {
     // recursive call to post_order_traversal
     // should construct code as traversing through tree
     // and add code to table when leaf is reached
-    post_order_traversal(root, c, table);
+    post_order_traversal(root, c, table); // fills table with codes
 }
 
 Node *rebuild_tree(uint16_t nbytes, uint8_t tree[static nbytes]) {
