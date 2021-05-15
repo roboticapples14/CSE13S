@@ -18,7 +18,7 @@ PriorityQueue *pq_create(uint32_t capacity) {
         pq->tail = 0;
         pq->size = 0;
         pq->capacity = capacity;		// set initial size of queue to given capacity
-        pq->nodes = (Node *) malloc(sizeof(Node));
+        pq->nodes = (Node *) calloc(capacity, sizeof(Node));
     }
     return pq;
 }
@@ -66,7 +66,7 @@ bool enqueue(PriorityQueue *q, Node *n) {
 }
 
 bool dequeue(PriorityQueue *q, Node **n) {
-    if (q && pq_empty(q)) {
+    if (q && !pq_empty(q)) {
         q->size -= 1;
         **n = q->nodes[q->head];
         q->head = (q->head + 1) % q->capacity;

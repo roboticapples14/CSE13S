@@ -50,6 +50,6 @@ bool code_pop_bit(Code *c, uint8_t *bit) {
 
 void code_print(Code *c) {
     for (int i = 0; i < c->top; i++) {
-        printf("%" PRIu8_t, (c->bits[i / 8] >> (i % 8) & 0x1)
+        printf("%" PRIu8, (c->bits[i / 8] >> (i % 8) & 0x1));
     }
 }
