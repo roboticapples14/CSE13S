@@ -1,5 +1,7 @@
 #include "code.h"
+#include "code2.h"
 #include <inttypes.h>
+#include <stdio.h>
 
 Code code_init(void) {
     Code c;
@@ -43,13 +45,18 @@ bool code_pop_bit(Code *c, uint8_t *bit) {
     else {
         c->top -= 1;
 	// shift og byte by bit offset, then AND with 0x1 to return single bit
-	bit = (c->bits[c->top / 8] >> (c->top % 8) & 0x1);
+	*bit = (c->bits[c->top / 8] >> (c->top % 8) & 0x1);
 	return true;
     }
 }
 
+uint8_t code_get_bit(Code *c, uint32_t i) {
+    return (c->bits[i / 8] >> (i % 8) & 0x1); // shift og vector right by offset, then && with 0x1
+}
+
+
 void code_print(Code *c) {
-    for (int i = 0; i < c->top; i++) {
-        printf("%" PRIu8, (c->bits[i / 8] >> (i % 8) & 0x1));
+    for (uint32_t i = 0; i < c->top; i++) {
+	printf("%" PRIu8, code_get_bit(c, i));
     }
 }

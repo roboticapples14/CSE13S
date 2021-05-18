@@ -4,10 +4,11 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include "defines.h"
+#include "code.h"
+#include "code2.h"
+
 // extern bytes_read;
 // extern bytes_written;
-static uint8_t buffer[BLOCK]; // contains bits
-static int buffer_index = 0;
 
 
 //TESTED: working
@@ -26,25 +27,26 @@ int read_bytes(int infile, uint8_t *buf, int nbytes) {
 // write to file from buffer. Loops uitil nbytes were written and returns # bytes written
 int write_bytes(int outfile, uint8_t *buf, int nbytes) {
     int bytes_written = 0;
-    while ((n = write(outfile, buf, nbytes)) > 0 && bytes_read < nbytes) {
+    int n;
+    while ((n = write(outfile, buf, nbytes)) > 0 && bytes_written < nbytes) {
         bytes_written += n;
     }
     return bytes_written;
 }
 
 //TODO
+/*
 bool read_bit(int infile, uint8_t *bit) {
     // reads into buffer
     // tracks buffer index into buffer and reads in 1 bit at a time
     // when buffer !full, fill it
 }
 
-//TESTED: working
 // each bit in code c buffered until buffer is full, then write out entire buffer
 void write_code(int outfile, Code *c) {
     for (int i = 0; i < c->top; i++) {
         // for every bit in c, if bit is 1, set bit in buffer, else clear it
-	if (get_bit(c, i)) {
+	if (code_get_bit(c, i)) {
             set_bit(buffer, buffer_index);
 	}
 	else {
@@ -64,4 +66,4 @@ void flush_codes(int outfile) {
     if (buff_index != 0) {
         write_bytes(outfile, buffer, buff_index);
     }
-}
+}*/

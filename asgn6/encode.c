@@ -16,6 +16,7 @@
 #include <string.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <fcntl.h>
 
 // h = help, i = infile, o = outfile, v = verbose
 #define OPTIONS "hvi:o:"
@@ -24,15 +25,20 @@ void print_instructions();
 
 int main(int argc, char *argv[]) {
     int opt = 0;
-    FILE *infile = stdin;
-    FILE *outfile = stdout;
+    /*FILE *infile = stdin;
+    FILE *outfile = stdout;*/
+    char *infile;
+    char *outfile;
+    int fd_in;			// file descriptor for infile
+    int fd_out;			// file descriptor for outfile
+    uint8_t buf[BLOCK];		// character buffer for reading and writing input/output
+    int bytes_processed;	// holds return value of read_bytes() and write_bytes()
     int help = 0;
     int verbose = 0;
     int infile_given = 0;
     int outfile_given = 0;
-    char input_byte; 		// where lines are stored
     uint64_t hist[ALPHABET]; 	// histogram of character frequencies
-    Code table[ALPHABET]	// table of cooresponding character codes
+    Code table[ALPHABET];	// table of cooresponding character codes
 
     //user input loop
     while ((opt = getopt(argc, argv, OPTIONS)) != -1) {
@@ -47,17 +53,23 @@ int main(int argc, char *argv[]) {
 			break;
 		case 'i':
 			infile_given = 1;
-                        infile = fopen(optarg, "r"); //r for read
-                        if (infile == NULL) {
+			// open input file
+                        infile = optarg;
+			fd_in = open(infile, O_RDONLY, 0); 
+                        // error opening if open returns -1
+			if (fd_in == -1) {
                 		fprintf(stderr, "failed to open input file");
                 		return 1;
 			}
 			break;
 		case 'o':
-            		outfile_given = 1;
-            		outfile = fopen(optarg, "w"); //w for write
-            		if (outfile == NULL) {
-                		fprintf(stderr, "failed to open output file");
+			outfile_given = 1;
+			// open output file
+                        outfile = optarg;
+			fd_out = open(outfile, O_WRONLY, 0); 
+                        // error opening if open returns -1
+			if (fd_in == -1) {
+                		fprintf(stderr, "failed to open input file");
                 		return 1;
 			}
 			break;
@@ -72,13 +84,12 @@ int main(int argc, char *argv[]) {
     }
     
     //  Getting  and  setting  file  permissions
-    struct stat statbuf;
-    fstat(fileno(infile), &statbuf);
-    fchmod(fileno(outfile), statbuf.st_mode);
-
-    //READ INPUT AND CONSTRUCT HIST
-    read_bytes();
-
+    //TODO: FIX
+    /*if (infile_given && outfile_given) {
+        struct stat statbuf;
+        fstat(fileno(fd_in), &statbuf);
+        fchmod(fileno(fd_out), statbuf.st_mode);
+    }*/
 
     // START ENCODING PROCESS
     
@@ -86,20 +97,43 @@ int main(int argc, char *argv[]) {
     for (int i = 0; i < ALPHABET; i++) {
         hist[i] = 0;
     }
-    //read in input
 
-
-    while ((input_byte = fgetc(infile)) != EOF) {
-        fputc(code_lower, outfile);
-        fputc(code_upper, outfile);
+    //READ INPUT AND POPULATE HIST
+    while ((bytes_processed = read_bytes(fd_in, buf, BLOCK)) > 0) {
+        // for each character in buffer
+        for (int i = 0; i < bytes_processed; i++) {
+            hist[buf[i]] += 1;	// increment counter of hist at character read
+        }
     }
+
+    // build Huffman tree from histogram
+    Node *root = build_tree(hist);
+
+    // INITIATE CODE TABLE
+    for (int i = 0; i < ALPHABET; i++) {
+        table[i] = code_init();
+    }
+    // populate code table with char codes from tree
+    build_codes(root, table);
+
+
+
+    for (int i = 0; i < ALPHABET; i++) {
+        if (!code_empty(&table[i])) {
+            printf("%i: ", i);
+            code_print(&(table[i]));
+            printf("\n");
+        }
+    }
+
+
 
     // close any opened files
     if (infile_given) {
-        fclose(infile);
+        close(fd_in);
     }
     if (outfile_given) {
-        fclose(outfile);
+        close(fd_out);
     }
     // free allocated data
 

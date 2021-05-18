@@ -42,6 +42,8 @@ void build_codes(Node *root, Code table[static ALPHABET]) {
     post_order_traversal(root, c, table); // fills table with codes
 }
 
+
+/*
 //TODO: decoder
 Node *rebuild_tree(uint16_t nbytes, uint8_t tree[static nbytes]) {
 
@@ -50,6 +52,8 @@ Node *rebuild_tree(uint16_t nbytes, uint8_t tree[static nbytes]) {
 void delete_tree(Node **root) {
     
 }
+*/
+
 
 
 void post_order_traversal(Node *root, Code c, Code table[static ALPHABET]) {

@@ -1,3 +1,9 @@
+#include <stdlib.h>
+#include <inttypes.h>
+#include <stdbool.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include "stack.h"
 #include "node.h"
 
@@ -12,8 +18,7 @@ Stack *stack_create(uint32_t capacity) {
     if (s) {
         s->top = 0;
         s->capacity = capacity;
-        s->size = 0;
-        s->items = (uint64_t *) calloc(capacity, sizeof(uint64_t));
+        s->items = (Node **) calloc(capacity, sizeof(Node));
         if (!s->items) {
             free(s);
             s = NULL;
@@ -58,17 +63,13 @@ bool stack_pop(Stack *s, Node **n) {
     }
     s->top -= 1;
     *n = s->items[s->top];
-    s->size -= 1;
     return true;
 }
 
 void stack_print(Stack *s) {
     for (uint32_t i = 0; i < s->top; i += 1) {
-        fprintf(outfile, "%s", cities[s->items[i]]);
-        if (i + 1 != s->top) {
-            fprintf(outfile, " -> ");
-        }
+        node_print(s->items[i]);
+	printf("\n");
     }
-    fprintf(outfile, "\n");
 }
 

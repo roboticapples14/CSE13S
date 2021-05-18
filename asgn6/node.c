@@ -1,6 +1,7 @@
 #include "node.h"
 #include <inttypes.h>
 #include <stdlib.h>
+#include <stdio.h>
 //STATUS: tested, all working besides problems with node_delete
 
 Node *node_create(uint8_t symbol, uint64_t frequency) {
@@ -31,7 +32,7 @@ Node *node_join(Node *left, Node *right) {
 // print node's char, frequency, and all children
 void node_print(Node *n) {
     // print in format (symbol, frequency)
-    printf(" (%c, ", (char *) n->symbol);
+    printf(" (%i, ", n->symbol);
     printf(" %" PRIu64 ") ", n->frequency);
     /*if (n->left) {
         printf("\nLeft Node:\n");
