@@ -5,7 +5,10 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+int tree_size;
+
 Node *build_tree(uint64_t hist[static ALPHABET]) {
+    extern int tree_size;
     // create priority queue
     PriorityQueue *pq = pq_create(ALPHABET * 2);
     for (int i = 0; i < ALPHABET; i++) {
@@ -15,6 +18,7 @@ Node *build_tree(uint64_t hist[static ALPHABET]) {
             Node *n = node_create(i, hist[i]);
 	    // enqueue node
 	    enqueue(pq, n);
+	    tree_size += 1;	// increment exten var tree_size
 	}
     }
 
@@ -43,17 +47,39 @@ void build_codes(Node *root, Code table[static ALPHABET]) {
 }
 
 
-/*
 //TODO: decoder
 Node *rebuild_tree(uint16_t nbytes, uint8_t tree[static nbytes]) {
-
+    Stack *s = stack_create(nbytes);
+    for (int i = 0; i < nbytes; i++) {
+        if (tree[i] == 'L') {
+            Node *n = node_create(tree[i + 1], 0);
+	    stack_push(s, n);	// push node of char onto the stack
+	    i += 1;		// increment i to not process char
+	}
+	else if (tree[i] == 'I') {
+            Node *right = node_create(' ', 0);
+	    Node *left = node_create(' ', 0);
+	    // pop 2 nodes from stack and join
+	    stack_pop(s, &right);
+	    stack_pop(s, &left);
+	    Node *parent = node_join(left, right);
+	    stack_push(s, parent);
+	}
+    }
+    Node *root;
+    stack_pop(s, &root);
+    return root;
 }
 //TODO
 void delete_tree(Node **root) {
-    
+    if (root->left != NULL) {
+        delete_tree(root->left);
+    }
+    if (root->right != NULL) {
+        delete_tree(root->right);
+    }
+    node_delete(&root);
 }
-*/
-
 
 
 void post_order_traversal(Node *root, Code c, Code table[static ALPHABET]) {

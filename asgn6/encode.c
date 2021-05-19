@@ -7,6 +7,7 @@
 #include "io.h"
 #include "stack.h"
 #include "sys/stat.h"
+#include "header.h"
 
 #include <assert.h>
 #include <inttypes.h>
@@ -22,6 +23,8 @@
 #define OPTIONS "hvi:o:"
 
 void print_instructions();
+int tree_size;
+
 
 int main(int argc, char *argv[]) {
     int opt = 0;
@@ -29,14 +32,15 @@ int main(int argc, char *argv[]) {
     FILE *outfile = stdout;*/
     char *infile;
     char *outfile;
-    int fd_in;			// file descriptor for infile
-    int fd_out;			// file descriptor for outfile
+    int fd_in = STDIN_FILENO;			// file descriptor for infile
+    int fd_out = STDOUT_FILENO;			// file descriptor for outfile
     uint8_t buf[BLOCK];		// character buffer for reading and writing input/output
     int bytes_processed;	// holds return value of read_bytes() and write_bytes()
     int help = 0;
     int verbose = 0;
     int infile_given = 0;
     int outfile_given = 0;
+    extern int tree_size; 	// num of unique characters in tree
     uint64_t hist[ALPHABET]; 	// histogram of character frequencies
     Code table[ALPHABET];	// table of cooresponding character codes
 
@@ -85,17 +89,22 @@ int main(int argc, char *argv[]) {
     
     //  Getting  and  setting  file  permissions
     //TODO: FIX
-    /*if (infile_given && outfile_given) {
-        struct stat statbuf;
-        fstat(fileno(fd_in), &statbuf);
-        fchmod(fileno(fd_out), statbuf.st_mode);
-    }*/
+    struct stat statbuf;
+    fstat(fd_in, &statbuf);
+    fchmod(fd_out, statbuf.st_mode);
 
     // START ENCODING PROCESS
     
     //zero out histogram
     for (int i = 0; i < ALPHABET; i++) {
-        hist[i] = 0;
+        // increment elements 0 and 255
+	if (i == 0 || i == 255) {
+            hist[i] = 1;
+	}
+	// otherwise initialize to 0
+	else {
+	    hist[i] = 0;
+	}
     }
 
     //READ INPUT AND POPULATE HIST
@@ -106,7 +115,9 @@ int main(int argc, char *argv[]) {
         }
     }
 
+    
     // build Huffman tree from histogram
+    tree_size = 0;
     Node *root = build_tree(hist);
 
     // INITIATE CODE TABLE
@@ -117,7 +128,7 @@ int main(int argc, char *argv[]) {
     build_codes(root, table);
 
 
-
+    // print out code table
     for (int i = 0; i < ALPHABET; i++) {
         if (!code_empty(&table[i])) {
             printf("%i: ", i);
@@ -126,6 +137,29 @@ int main(int argc, char *argv[]) {
         }
     }
 
+    // CONSTRUCT HEADER
+    Header header;
+    header.magic = MAGIC;
+    header.permissions = fstat(fd_in, &statbuf);
+    header.tree_size = (3 * tree_size) - 1; 	// tree_size = # of unique chars in tree
+    header.file_size = statbuf.st_size; 	// from fstat above
+
+    // WRITE HEADER
+    write_bytes(fd_out, (uint8_t *) &header, sizeof(Header)); 	// writes header to outfile
+    
+    // SECOND PASS
+    lseek(fd_in, 0, SEEK_SET); 	// get back to beginning of file input
+
+    //read from file one BLOCK at a time
+    while ((bytes_processed = read_bytes(fd_in, buf, BLOCK)) > 0) {
+        // for each character in buffer
+        for (int i = 0; i < bytes_processed; i++) {
+            // write out the code cooresponding to that char
+	    write_code(fd_out, &table[buf[i]]);
+        }
+    }
+    // write remaining bits if anything left in buffer
+    flush_codes(fd_out);
 
 
     // close any opened files
