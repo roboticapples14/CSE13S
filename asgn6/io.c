@@ -3,6 +3,7 @@
 #include <inttypes.h>
 #include <stdint.h>
 #include <stdbool.h>
+#include <stdio.h>
 #include "defines.h"
 #include "code.h"
 #include "code2.h"
@@ -13,20 +14,20 @@ static uint8_t bit_buf[BLOCK]; 	// buffer for code bits
 static int bit_index = 0;	// index for bit_buf
 // read_bit vars:
 static int bread = 0;		// bytes read from buffer in read_bit
-static int last_bit = 0;	// index of last bit in read_bit
+static int last_bit = -1;	// index of last bit in read_bit
 
 //TESTED: working
 // reads file until nbytes have been read or until there are no more bytes left to read
 // returns number of bytes read
 int read_bytes(int infile, uint8_t *buf, int nbytes) {
-    int bytes_read = 0;
-    int n = read(infile, buf, nbytes);
-    bytes_read += n;
-    while (n > 0 && bytes_read < nbytes) {
-        n = read(infile, buf, nbytes - bytes_read);
-        bytes_read += n;
+    int total = 0;	// total num of bytes read
+    int n = read(infile, buf, nbytes); 	// bytes read by each call to read
+    total += n;
+    while (n > 0 && total < nbytes) {
+	n = read(infile, buf, nbytes - total);
+        total += n;
     }
-    return bytes_read;
+    return total;
 }
 
 //TESTED: working
@@ -47,7 +48,7 @@ bool read_bit(int infile, uint8_t *bit) {
     // uses static bit buffer and vars bread, bit_index, and last_bit
     // if buffer's empty
     if (bit_index == 0) {
-        bread = read_bytes(infile, bit_buf, BLOCK);    
+	bread = read_bytes(infile, bit_buf, BLOCK);    
         if (bread < BLOCK) {
             last_bit = 8 * bread + 1;
 	}
@@ -59,8 +60,8 @@ bool read_bit(int infile, uint8_t *bit) {
         bit_index = 0;
     }
     // return T/F if bit_index has not reached end of buffer
-    if (bit_index >= last_bit) {
-        return false;
+    if (bit_index == last_bit) {
+	return false;
     }
     else {
         return true;

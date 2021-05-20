@@ -32,18 +32,21 @@ int main(int argc, char *argv[]) {
     FILE *outfile = stdout;*/
     char *infile;
     char *outfile;
-    int fd_in = STDIN_FILENO;			// file descriptor for infile
-    int fd_out = STDOUT_FILENO;			// file descriptor for outfile
+    int fd_in = STDIN_FILENO;	// file descriptor for infile
+    int fd_out = STDOUT_FILENO;	// file descriptor for outfile
     uint8_t buf[BLOCK];		// character buffer for reading and writing input/output
     int bytes_processed;	// holds return value of read_bytes() and write_bytes()
+    // arg flags
     int help = 0;
     int verbose = 0;
     int infile_given = 0;
     int outfile_given = 0;
+    // decoding vars
     int buf_index;
     uint64_t decoded_symbols;
     uint8_t bit;
-
+    int total_bytes = 0;	// counter for total bytes in decompressed file
+    int compressed_file_size = 0; // for verbose stats
     //user input loop
     while ((opt = getopt(argc, argv, OPTIONS)) != -1) {
         switch (opt) {
@@ -85,7 +88,8 @@ int main(int argc, char *argv[]) {
         print_instructions();
         return 1;
     }
-    
+    // TODO: record compressed file size for verbose stats 
+
 
     // START DECODING PROCESS
     
@@ -104,42 +108,30 @@ int main(int argc, char *argv[]) {
     // initialize tree_dump array
     uint8_t tree_dump[h.tree_size];
 
-    //READ INPUT AND POPULATE HUFFMAN TREE ARRAY
-    while ((bytes_processed = read_bytes(fd_in, buf, h.tree_size)) > 0) {
+    //READ INPUT AND POPULATE TREE DUMP
+    bytes_processed = read_bytes(fd_in, buf, h.tree_size);
+    if (bytes_processed == h.tree_size) {
         // for each character in buffer
-        for (int i = 0; i < bytes_processed; i++) {
+	for (int i = 0; i < bytes_processed; i++) {
             tree_dump[i] = buf[i];  // add char to tree_dump array
         }
     }
-
-
-
-    //TESTIING: print tree dump
-    for (int i = 0; i < h.tree_size; i++) {
-        printf("%" PRIu8 "\n", tree_dump[i]);
+    else {
+        printf("error: huffman tree not read properly\n");
+	return 1;
     }
 
-
-
     // REBUILD TREE
-    Node *root = rebuild_tree(tree_size, tree_dump);
-    
+    Node *root = rebuild_tree(h.tree_size, tree_dump);
     
     // TRANSLATE CODES TO SYMBOLS
-    Node *cur = node_create(root->symbol, root->frequency);
-    // reset buffer
+    Node *cur = root;
     buf_index = 0;
     decoded_symbols = 0;
     // use huffman tree to reconstruct origional messsage
     // itterate through each bit in input and traverse the tree until leaf is met
-    
-    
-    //TODO: test and fix read_bit
-    //read_bit(fd_in, &bit);
-    printf("outside loop\n");
     while (read_bit(fd_in, &bit) && decoded_symbols <= h.file_size) {
-        printf("inside loop\n");
-	// if bit = 0, go left
+        // if bit = 0, go left
 	if (bit == 0) {
             cur = cur->left;
 	}
@@ -150,24 +142,33 @@ int main(int argc, char *argv[]) {
         // if cur is a leaf node
 	if (cur->left == NULL && cur->right == NULL) {
             // add current symbol to output buffer
-	    /*buf[buf_index] = root->symbol;
+	    buf[buf_index] = cur->symbol;
 	    buf_index += 1;
+	    total_bytes += 1;
 	    decoded_symbols += 1;
+	    cur = root;
 	    // write out buffer if full
 	    if (buf_index == BLOCK) {
                 write_bytes(fd_out, buf, BLOCK);
 		buf_index = 0;
-	    }*/
-	    printf("%" PRIu8, root->symbol);
-	    decoded_symbols += 1;
-	    cur = root;
+	    }
 	}
     }
     // write whatever remains on buffer
-    //if (buf_index > 0) {
+    if (buf_index > 0) {
         write_bytes(fd_out, buf, buf_index);
-    //}
+    }
 
+    // print decoding stats if verbose is chosen
+    if (verbose == 1) {
+	float space_saved = 100 * (1 - ((float) compressed_file_size / (float) h.file_size));
+        fprintf(stdout, "Compressed file size: %i bytes\n", compressed_file_size);
+        fprintf(stdout, "Decompressed file size: %" PRIu64 " bytes\n", h.file_size);
+        fprintf(stdout, "Space saving: %f\n", space_saved);
+    }
+
+
+    //CLOSE FILES
 }
 
 void print_instructions() {
@@ -185,3 +186,4 @@ void print_instructions() {
     printf("  -i infile      Input file to decompress.\n");
     printf("  -o outfile     Output of decompressed data.\n");
 }
+
