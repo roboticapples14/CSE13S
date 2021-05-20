@@ -112,6 +112,15 @@ int main(int argc, char *argv[]) {
         }
     }
 
+
+
+    //TESTIING: print tree dump
+    for (int i = 0; i < h.tree_size; i++) {
+        printf("%" PRIu8 "\n", tree_dump[i]);
+    }
+
+
+
     // REBUILD TREE
     Node *root = rebuild_tree(tree_size, tree_dump);
     
@@ -126,7 +135,10 @@ int main(int argc, char *argv[]) {
     
     
     //TODO: test and fix read_bit
-    while (read_bit(fd_in, &bit) && decoded_symbols != h.file_size) {
+    //read_bit(fd_in, &bit);
+    printf("outside loop\n");
+    while (read_bit(fd_in, &bit) && decoded_symbols <= h.file_size) {
+        printf("inside loop\n");
 	// if bit = 0, go left
 	if (bit == 0) {
             cur = cur->left;

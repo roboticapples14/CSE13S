@@ -23,7 +23,7 @@ int read_bytes(int infile, uint8_t *buf, int nbytes) {
     int n = read(infile, buf, nbytes);
     bytes_read += n;
     while (n > 0 && bytes_read < nbytes) {
-        n = read(infile, buf, nbytes);
+        n = read(infile, buf, nbytes - bytes_read);
         bytes_read += n;
     }
     return bytes_read;
@@ -36,13 +36,12 @@ int write_bytes(int outfile, uint8_t *buf, int nbytes) {
     int n = write(outfile, buf, nbytes);
     bytes_written += n;
     while (n > 0 && bytes_written < nbytes) {
-        n = write(outfile, buf, nbytes);
+        n = write(outfile, buf, nbytes - bytes_written);
         bytes_written += n;
     }
     return bytes_written;
 }
 
-//TODO
 // used to read in bits in decode
 bool read_bit(int infile, uint8_t *bit) {
     // uses static bit buffer and vars bread, bit_index, and last_bit
@@ -60,7 +59,7 @@ bool read_bit(int infile, uint8_t *bit) {
         bit_index = 0;
     }
     // return T/F if bit_index has not reached end of buffer
-    if (bit_index == last_bit) {
+    if (bit_index >= last_bit) {
         return false;
     }
     else {
