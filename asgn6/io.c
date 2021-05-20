@@ -20,8 +20,10 @@ static int last_bit = 0;	// index of last bit in read_bit
 // returns number of bytes read
 int read_bytes(int infile, uint8_t *buf, int nbytes) {
     int bytes_read = 0;
-    int n;
-    while ((n = read(infile, buf, nbytes)) > 0 && bytes_read < nbytes) {
+    int n = read(infile, buf, nbytes);
+    bytes_read += n;
+    while (n > 0 && bytes_read < nbytes) {
+        n = read(infile, buf, nbytes);
         bytes_read += n;
     }
     return bytes_read;
@@ -31,8 +33,10 @@ int read_bytes(int infile, uint8_t *buf, int nbytes) {
 // write to file from buffer. Loops uitil nbytes were written and returns # bytes written
 int write_bytes(int outfile, uint8_t *buf, int nbytes) {
     int bytes_written = 0;
-    int n;
-    while ((n = write(outfile, buf, nbytes)) > 0 && bytes_written < nbytes) {
+    int n = write(outfile, buf, nbytes);
+    bytes_written += n;
+    while (n > 0 && bytes_written < nbytes) {
+        n = write(outfile, buf, nbytes);
         bytes_written += n;
     }
     return bytes_written;

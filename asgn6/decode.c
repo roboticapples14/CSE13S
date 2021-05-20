@@ -37,10 +37,12 @@ int main(int argc, char *argv[]) {
     uint8_t buf[BLOCK];		// character buffer for reading and writing input/output
     int bytes_processed;	// holds return value of read_bytes() and write_bytes()
     int help = 0;
+    int verbose = 0;
     int infile_given = 0;
     int outfile_given = 0;
+    int buf_index;
+    uint64_t decoded_symbols;
     uint8_t bit;
-    Code table[ALPHABET];	// table of cooresponding character codes
 
     //user input loop
     while ((opt = getopt(argc, argv, OPTIONS)) != -1) {
@@ -69,7 +71,7 @@ int main(int argc, char *argv[]) {
                         outfile = optarg;
 			fd_out = open(outfile, O_WRONLY, 0); 
                         // error opening if open returns -1
-			if (fd_in == -1) {
+			if (fd_out == -1) {
                 		fprintf(stderr, "failed to open input file");
                 		return 1;
 			}
@@ -109,16 +111,50 @@ int main(int argc, char *argv[]) {
             tree_dump[i] = buf[i];  // add char to tree_dump array
         }
     }
+
     // REBUILD TREE
     Node *root = rebuild_tree(tree_size, tree_dump);
+    
+    
+    // TRANSLATE CODES TO SYMBOLS
     Node *cur = node_create(root->symbol, root->frequency);
+    // reset buffer
+    buf_index = 0;
+    decoded_symbols = 0;
     // use huffman tree to reconstruct origional messsage
     // itterate through each bit in input and traverse the tree until leaf is met
-    while (read_bit(fd_in, &bit)) {
-        if (root->left == NULL && root->right == NULL) {
-            
+    
+    
+    //TODO: test and fix read_bit
+    while (read_bit(fd_in, &bit) && decoded_symbols != h.file_size) {
+	// if bit = 0, go left
+	if (bit == 0) {
+            cur = cur->left;
+	}
+	// else bit = 1, go right
+	else {
+            cur = cur->right;
+	}
+        // if cur is a leaf node
+	if (cur->left == NULL && cur->right == NULL) {
+            // add current symbol to output buffer
+	    /*buf[buf_index] = root->symbol;
+	    buf_index += 1;
+	    decoded_symbols += 1;
+	    // write out buffer if full
+	    if (buf_index == BLOCK) {
+                write_bytes(fd_out, buf, BLOCK);
+		buf_index = 0;
+	    }*/
+	    printf("%" PRIu8, root->symbol);
+	    decoded_symbols += 1;
+	    cur = root;
 	}
     }
+    // write whatever remains on buffer
+    //if (buf_index > 0) {
+        write_bytes(fd_out, buf, buf_index);
+    //}
 
 }
 

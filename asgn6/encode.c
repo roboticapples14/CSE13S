@@ -22,9 +22,11 @@
 // h = help, i = infile, o = outfile, v = verbose
 #define OPTIONS "hvi:o:"
 
+void write_tree(int outfile, Node *root);
 void print_instructions();
 int tree_size;
-
+static uint8_t tree_buf[BLOCK];
+static int tree_buf_index;
 
 int main(int argc, char *argv[]) {
     int opt = 0;
@@ -72,7 +74,7 @@ int main(int argc, char *argv[]) {
                         outfile = optarg;
 			fd_out = open(outfile, O_WRONLY, 0); 
                         // error opening if open returns -1
-			if (fd_in == -1) {
+			if (fd_out == -1) {
                 		fprintf(stderr, "failed to open input file");
                 		return 1;
 			}
@@ -128,18 +130,10 @@ int main(int argc, char *argv[]) {
     build_codes(root, table);
 
 
-    // print out code table
-    for (int i = 0; i < ALPHABET; i++) {
-        if (!code_empty(&table[i])) {
-            printf("%i: ", i);
-            code_print(&(table[i]));
-            printf("\n");
-        }
-    }
-
     // CONSTRUCT HEADER
     Header header;
     header.magic = MAGIC;
+    // header.permissions = fstat(fd_in, &statbuf);
     header.permissions = fstat(fd_in, &statbuf);
     header.tree_size = (3 * tree_size) - 1; 	// tree_size = # of unique chars in tree
     header.file_size = statbuf.st_size; 	// from fstat above
@@ -147,7 +141,15 @@ int main(int argc, char *argv[]) {
     // WRITE HEADER
     write_bytes(fd_out, (uint8_t *) &header, sizeof(Header)); 	// writes header to outfile
     
-    // SECOND PASS
+    // WRITE TREE TO OUTFILE
+    tree_buf_index = 0;
+    write_tree(fd_out, root);
+    if (tree_buf_index > 0) {
+        write_bytes(fd_out, tree_buf, tree_buf_index);
+	tree_buf_index = 0;
+    }
+
+    // SECOND PASS TO OUTPUT ENCRYPTED DATA
     lseek(fd_in, 0, SEEK_SET); 	// get back to beginning of file input
 
     //read from file one BLOCK at a time
@@ -160,6 +162,8 @@ int main(int argc, char *argv[]) {
     }
     // write remaining bits if anything left in buffer
     flush_codes(fd_out);
+
+
 
 
     // close any opened files
@@ -188,4 +192,32 @@ void print_instructions() {
     printf("  -v             Print compression statistics.");
     printf("  -i infile      Input data to encode.\n");
     printf("  -o outfile     Output of encoded data.\n");
+}
+
+void write_tree(int outfile, Node *root) {
+    // buffer full handling
+    if (tree_buf_index == BLOCK - 1) {
+        write_bytes(outfile, tree_buf, tree_buf_index);
+	tree_buf_index = 0;
+    }
+
+    // if leaf node
+    if (root->right == NULL && root->left == NULL) {
+        // print out L for leaf
+	tree_buf[tree_buf_index] = 'L';
+        // print out symbol of node
+	tree_buf[tree_buf_index + 1] = root->symbol;
+	tree_buf_index += 2;
+    }
+    // if node is a parent, recurse down left then right then add an I
+    else {
+        if (root->left != NULL) {
+            write_tree(outfile, root->left);
+        }
+        if (root->right != NULL) {
+            write_tree(outfile, root->right);
+        }
+        tree_buf[tree_buf_index] = 'I';
+	tree_buf_index += 1;
+    }
 }

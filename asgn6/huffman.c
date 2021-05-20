@@ -1,6 +1,7 @@
 #include "huffman.h"
 #include "huffman2.h"
 #include "pq.h"
+#include "stack.h"
 #include <inttypes.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -72,13 +73,13 @@ Node *rebuild_tree(uint16_t nbytes, uint8_t tree[static nbytes]) {
 }
 //TODO
 void delete_tree(Node **root) {
-    if (root->left != NULL) {
-        delete_tree(root->left);
+    if (&((*root)->left) != NULL) {
+        delete_tree((&(*root)->left));
     }
-    if (root->right != NULL) {
-        delete_tree(root->right);
+    if ((&(*root)->right) != NULL) {
+        delete_tree((&(*root)->right));
     }
-    node_delete(&root);
+    node_delete(root);
 }
 
 
