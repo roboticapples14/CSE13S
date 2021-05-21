@@ -1,7 +1,9 @@
 #include "pq.h"
+
 #include "node.h"
-#include <stdlib.h>
+
 #include <stdio.h>
+#include <stdlib.h>
 
 struct PriorityQueue {
     Node *nodes;
@@ -17,7 +19,7 @@ PriorityQueue *pq_create(uint32_t capacity) {
         pq->head = 0;
         pq->tail = 0;
         pq->size = 0;
-        pq->capacity = capacity;		// set initial size of queue to given capacity
+        pq->capacity = capacity; // set initial size of queue to given capacity
         pq->nodes = (Node *) calloc(capacity, sizeof(Node));
     }
     return pq;
@@ -42,26 +44,23 @@ uint32_t pq_size(PriorityQueue *q) {
     return q->size;
 }
 
-//TODO: confirm enqueue logic
-//TODO: insertion sort in respect to node frequency
 bool enqueue(PriorityQueue *q, Node *n) {
     if (pq_full(q)) {
         return false;
-    }
-    else {
-	// insert n to tail of queue
-        q->nodes[q->tail] = *n; 	// add n to end of queue
-	q->size += 1;			// increment size
+    } else {
+        // insert n to tail of queue
+        q->nodes[q->tail] = *n; // add n to end of queue
+        q->size += 1; // increment size
         // while at least 1 more element in front of tail and element n is smaller than element ahead of it
-	int j = q->tail;
-	while (((j - q->head) >= 1) && ((q->nodes[j]).frequency < (q->nodes[j - 1]).frequency)) {
+        int j = q->tail;
+        while (((j - q->head) >= 1) && ((q->nodes[j]).frequency < (q->nodes[j - 1]).frequency)) {
             // swap n with item ahead of it in array if smaller
             q->nodes[j] = q->nodes[j - 1];
             q->nodes[j - 1] = *n;
-	    j--;
-	}
-	q->tail = (q->tail + 1) % q->capacity; // increment tail in circular queue
-	return true;
+            j--;
+        }
+        q->tail = (q->tail + 1) % q->capacity; // increment tail in circular queue
+        return true;
     }
 }
 

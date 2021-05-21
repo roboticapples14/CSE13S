@@ -1,13 +1,14 @@
-#include <stdlib.h>
+#include "stack.h"
+
+#include "node.h"
+
 #include <inttypes.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include "stack.h"
-#include "node.h"
 
-struct Stack {	
+struct Stack {
     uint32_t top;
     uint32_t capacity;
     Node **items;
@@ -69,7 +70,6 @@ bool stack_pop(Stack *s, Node **n) {
 void stack_print(Stack *s) {
     for (uint32_t i = 0; i < s->top; i += 1) {
         node_print(s->items[i]);
-	printf("\n");
+        printf("\n");
     }
 }
-
