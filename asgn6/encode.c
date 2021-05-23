@@ -164,8 +164,12 @@ int main(int argc, char *argv[]) {
         fprintf(stdout, "\n");
         fprintf(stdout, "Uncompressed file size: %" PRIu64 " bytes\n", header.file_size);
         fprintf(stdout, "Compressed file size: %" PRIu64 " bytes\n", bytes_written);
-        fprintf(stdout, "Space saving: %f\n", space_saved);
+        fprintf(stdout, "Space saving: %.2f%%\n", space_saved);
     }
+
+
+    // delete tree
+    delete_tree(&root);
 
     // close any opened files
     if (infile_given) {

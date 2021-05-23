@@ -38,6 +38,9 @@ Node *build_tree(uint64_t hist[static ALPHABET]) {
     // dequeue root and return it
     Node *root = node_create(' ', 0);
     dequeue(pq, &root);
+    // delete priority queue
+    //TODO: DELETE PRIORITY QUEUE
+    //pq_delete(&pq);
     return root;
 }
 

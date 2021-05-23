@@ -162,7 +162,7 @@ int main(int argc, char *argv[]) {
         fprintf(stdout, "\n");
         fprintf(stdout, "Compressed file size: %" PRIu64 " bytes\n", bytes_read);
         fprintf(stdout, "Decompressed file size: %" PRIu64 " bytes\n", h.file_size);
-        fprintf(stdout, "Space saving: %f\n", space_saved);
+        fprintf(stdout, "Space saving: %.2f%%\n", space_saved);
     }
 
     //CLOSE FILES
