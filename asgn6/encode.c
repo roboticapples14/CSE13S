@@ -33,20 +33,20 @@ int main(int argc, char *argv[]) {
     int opt = 0;
     char *infile;
     char *outfile;
-    int fd_in = STDIN_FILENO; 	// file descriptor for infile
+    int fd_in = STDIN_FILENO; // file descriptor for infile
     int fd_out = STDOUT_FILENO; // file descriptor for outfile
-    uint8_t buf[BLOCK]; 	// character buffer for reading and writing input/output
-    int bytes_processed; 	// holds return value of read_bytes() and write_bytes()
+    uint8_t buf[BLOCK]; // character buffer for reading and writing input/output
+    int bytes_processed; // holds return value of read_bytes() and write_bytes()
     int help = 0;
     int verbose = 0;
     int infile_given = 0;
     int outfile_given = 0;
     tree_buf_index = 0;
-    extern int tree_size; 	// num of unique characters in tree
+    extern int tree_size; // num of unique characters in tree
     extern uint64_t bytes_read; // tracks total bytes read from infile
     extern uint64_t bytes_written; // tracks total bytes written to outfile
-    uint64_t hist[ALPHABET]; 	// histogram of character frequencies
-    Code table[ALPHABET]; 	// table of cooresponding character codes
+    uint64_t hist[ALPHABET]; // histogram of character frequencies
+    Code table[ALPHABET]; // table of cooresponding character codes
 
     //user input loop
     while ((opt = getopt(argc, argv, OPTIONS)) != -1) {
@@ -167,7 +167,6 @@ int main(int argc, char *argv[]) {
         fprintf(stdout, "Space saving: %.2f%%\n", space_saved);
     }
 
-
     // delete tree
     delete_tree(&root);
 
@@ -178,7 +177,6 @@ int main(int argc, char *argv[]) {
     if (outfile_given) {
         close(fd_out);
     }
-    // free allocated data
 
     return 0;
 }

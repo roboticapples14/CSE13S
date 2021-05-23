@@ -39,8 +39,7 @@ Node *build_tree(uint64_t hist[static ALPHABET]) {
     Node *root = node_create(' ', 0);
     dequeue(pq, &root);
     // delete priority queue
-    //TODO: DELETE PRIORITY QUEUE
-    //pq_delete(&pq);
+    pq_delete(&pq);
     return root;
 }
 
@@ -71,17 +70,20 @@ Node *rebuild_tree(uint16_t nbytes, uint8_t tree[static nbytes]) {
     }
     Node *root;
     stack_pop(s, &root);
+    stack_delete(&s);
     return root;
 }
 
 void delete_tree(Node **root) {
-    if (&((*root)->left) != NULL) {
-        delete_tree((&(*root)->left));
+    if (*root) {
+        if (&((*root)->left) != NULL) {
+            delete_tree((&(*root)->left));
+        }
+        if ((&(*root)->right) != NULL) {
+            delete_tree((&(*root)->right));
+        }
+        node_delete(root);
     }
-    if ((&(*root)->right) != NULL) {
-        delete_tree((&(*root)->right));
-    }
-    node_delete(root);
 }
 
 void post_order_traversal(Node *root, Code c, Code table[static ALPHABET]) {

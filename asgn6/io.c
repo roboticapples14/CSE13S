@@ -28,7 +28,7 @@ int read_bytes(int infile, uint8_t *buf, int nbytes) {
     while (n > 0 && total < nbytes) {
         n = read(infile, buf, nbytes - total);
         total += n;
-	bytes_written += n;
+        bytes_written += n;
     }
     return total;
 }
@@ -43,7 +43,7 @@ int write_bytes(int outfile, uint8_t *buf, int nbytes) {
     while (n > 0 && total < nbytes) {
         n = write(outfile, buf, nbytes - total);
         bytes_written += n;
-	total += n;
+        total += n;
     }
     return total;
 }
@@ -86,7 +86,7 @@ void write_code(int outfile, Code *c) {
         // if buffer is full
         if (bit_index == 8 * BLOCK) {
             write_bytes(outfile, bit_buf, BLOCK); // write buffer to outfile
-    	    bit_index = 0; // reset buffer index
+            bit_index = 0; // reset buffer index
         }
     }
 }
