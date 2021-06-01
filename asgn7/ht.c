@@ -62,11 +62,13 @@ Node *ht_lookup(HashTable *ht, char *oldspeak) {
 }
 
 void ht_insert(HashTable *ht, char *oldspeak, char *newspeak) {
-    uint32_t index = hash(ht->salt, oldspeak) % ht->size;
-    if (ht->lists[index] == NULL) {
-        ht->lists[index] = ll_create(ht->mtf);
+    if (ht_lookup(ht, oldspeak) == NULL) {
+        uint32_t index = hash(ht->salt, oldspeak) % ht->size;
+        if (ht->lists[index] == NULL) {
+            ht->lists[index] = ll_create(ht->mtf);
+        }
+        ll_insert(ht->lists[index], oldspeak, newspeak);
     }
-    ll_insert(ht->lists[index], oldspeak, newspeak);
 }
 
 uint32_t ht_count(HashTable *ht) {
@@ -80,14 +82,13 @@ uint32_t ht_count(HashTable *ht) {
 }
 
 void ht_print(HashTable *ht) {
-    if (*ht && (*ht)->lists) {
-        for (uint32_t i = 0; i < ht_size(*ht); i++) {
-            printf("hash[" PRIu32 "]: ", i);
-	    // if list at index is not empty
-            if ((*ht)->lists[i] != NULL) {
-                ll_print((*ht)->lists[i]);
-	    }
+    for (int i = 0; i < (int) ht_size(ht); i++) {
+        printf("hash[%i]: ", i);
+	// if list at index is not empty
+        if (ht->lists[i] != NULL) {
+            ll_print(ht->lists[i]);
 	}
+	printf("\n");
     }
 }
 

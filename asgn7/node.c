@@ -8,8 +8,18 @@
 
 Node *node_create(char *oldspeak, char *newspeak) {
     Node *n = (Node *) malloc(sizeof(Node));
-    n->oldspeak = strdup(oldspeak);
-    n->newspeak = strdup(newspeak);
+    if (oldspeak != NULL) {
+        n->oldspeak = strdup(oldspeak);
+    }
+    else {
+        n->oldspeak = NULL;
+    }
+    if (newspeak != NULL) {
+        n->newspeak = strdup(newspeak);
+    }
+    else {
+        n->newspeak = NULL;
+    }
     n->prev = NULL;
     n->next = NULL;
     return n;

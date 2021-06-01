@@ -22,12 +22,14 @@
 
 #define OPTIONS "hmst:f:"
 #define BLOCK 4096
+#define WORD "[a-z]"
+
 void print_instructions();
 
 
 int main(int argc, char *argv[]) {
-    char *badspeak;
-    char *newspeak;
+    char *badspeak = NULL;
+    char *newspeak = NULL;
     int opt = 0;
     bool mtf = 0;
     int stats = 0;
@@ -42,6 +44,7 @@ int main(int argc, char *argv[]) {
     int thoughtcrime = 0;		// for using badspeak
     int rightspeak = 0;			// for using oldspeak
     //user input loop
+    printf("Before input loop");
     while ((opt = getopt(argc, argv, OPTIONS)) != -1) {
         switch (opt) {
         //help menu
@@ -69,10 +72,14 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
+
+    printf("Before ht_create");
+    
     // Initialize bloom filter
     BloomFilter *bf = bf_create(bf_size);
     // Initialize hash table
     HashTable *ht = ht_create(ht_size, mtf);
+
 
     // Open badspeak.txt
     infile = fopen("badspeak.txt", "r");
@@ -83,9 +90,13 @@ int main(int argc, char *argv[]) {
 	
     // read in badspeak
     while ((fscanf(infile, "%s\n", badspeak)) != EOF) {
-        bf_insert(bf, badspeak);
+        //TODO: test bf_insert in replit
+	bf_insert(bf, badspeak);
 	ht_insert(ht, badspeak, NULL);
     }
+    //SEG FAULT IN WHILE^^^
+    //ASSERT WORKS UP UNTIL HERE, THEN SEG FAULT CUTS IT OFF
+    assert(1 == 0);
 
     // Open newspeak
     infile = fopen("newspeak.txt", "r");
@@ -100,11 +111,17 @@ int main(int argc, char *argv[]) {
 	ht_insert(ht, badspeak, newspeak);
     }
 
+
     // set input stream to stdin
     infile = stdin;
 
     // read user input to filter
     //TODO: regex
+ 
+    if (regcomp(&regex, WORD, REG_EXTENDED)) {
+        perror("regcomp");
+	exit(1);
+    }
     while ((new_word = next_word(infile, &regex)) != NULL) {
         // convert word to lower
         uint32_t j = 0;
@@ -150,6 +167,12 @@ int main(int argc, char *argv[]) {
         printf("%s", goodspeak_message);
 	//TODO: output transgressions
     }
+
+    // clear memory
+    /*fclose(infile);
+    clear_words();
+    regfree(&regex);*/
+
 }
 
 

@@ -15,6 +15,7 @@ struct LinkedList {
     bool mtf; 	// move to front flag
 };
 
+
 LinkedList *ll_create(bool mtf) {
     LinkedList *ll = (LinkedList *) malloc(sizeof(LinkedList));
     ll->head = node_create(NULL, NULL);
@@ -40,6 +41,7 @@ uint32_t ll_length(LinkedList *ll) {
     return ll->length;
 }
 
+//TODO: this is causing segfault
 Node *ll_lookup(LinkedList *ll, char *oldspeak) {
     // for each node in linked list
     for (Node *curr = ll->head; curr != NULL; curr = curr->next) {
@@ -65,14 +67,14 @@ Node *ll_lookup(LinkedList *ll, char *oldspeak) {
 void ll_insert(LinkedList *ll, char *oldspeak, char *newspeak) {
     // seach linked list to see if oldspeak has already been inserted
     for (Node *curr = ll->head; curr != NULL; curr = curr->next) {
-        if (curr->oldspeak == oldspeak) {
+        if (strcmp(curr->oldspeak, oldspeak) == 0) {
             return;
 	}
     }
     // insert node
     Node *n = node_create(oldspeak, newspeak);
-    n->prev = ll->head;
     n->next = ll->head->next;
+    n->prev = ll->head;
     ll->head->next = n;
     n->next->prev = n;
 }
