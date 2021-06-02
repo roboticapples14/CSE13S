@@ -64,12 +64,7 @@ bool bf_probe(BloomFilter *bf, char *oldspeak) {
     index = hash(bf->tertiary, oldspeak) % bf_size(bf);
     uint8_t third = bv_get_bit(bf->filter, index);
 
-    if (first && second && third) {
-        return true;
-    }
-    else {
-        return false;
-    }
+    return (first && second && third);
 }
 
 uint32_t bf_count(BloomFilter *bf) {

@@ -5,6 +5,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+uint64_t seeks; // Number of seeks performed.
+uint64_t links; // Number of links traversed.
 
 struct HashTable {
     uint64_t salt[2];

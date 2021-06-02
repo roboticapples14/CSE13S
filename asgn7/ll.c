@@ -5,8 +5,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-//extern uint64_t seeks; // Number of seeks performed.
-//extern uint64_t links; // Number of links traversed.
+uint64_t seeks; // Number of seeks performed.
+uint64_t links; // Number of links traversed.
 
 struct LinkedList {
     uint32_t length;
@@ -42,8 +42,11 @@ uint32_t ll_length(LinkedList *ll) {
 }
 
 Node *ll_lookup(LinkedList *ll, char *oldspeak) {
+    extern uint64_t seeks;
+    extern uint64_t links;
+    seeks += 1;
     // for each node in linked list
-    for (Node *curr = ll->head; curr != ll->tail; curr = curr->next) {
+    for (Node *curr = ll->head->next; curr != ll->tail; curr = curr->next) {
         // only do strcmp if both strings are not NULL
 	if (oldspeak != NULL && curr->oldspeak != NULL) {
 	    // if oldspeak of node matches searched oldspeak
@@ -60,6 +63,7 @@ Node *ll_lookup(LinkedList *ll, char *oldspeak) {
 	        return curr;
 	    }
         }
+	links += 1;
     }
     return NULL;
 }
@@ -81,8 +85,7 @@ void ll_print(LinkedList *ll) {
     // for each node in list, print out node
     for (Node *curr = ll->head->next; curr != ll->tail; curr = curr->next) {
         node_print(curr);
-	printf(", ");
+	printf("\n");
     }
-    printf("\n");
 }
 

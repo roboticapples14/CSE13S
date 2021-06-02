@@ -22,7 +22,8 @@
 
 #define OPTIONS "hmst:f:"
 #define BLOCK 4096
-#define WORD "([a-zA-Z0-9]+)(('|-)([a-zA-Z0-9]+))?"
+//TODO: why can start with non-letters?
+#define WORD "([a-zA-Z0-9])+(('|-)([a-zA-Z0-9])+)*"
 
 void print_instructions();
 
@@ -40,8 +41,9 @@ int main(int argc, char *argv[]) {
     LinkedList *old = ll_create(false);	// for recording oldspeak words
     int thoughtcrime = 0;		// for using badspeak
     int rightspeak = 0;			// for using oldspeak
+    extern uint64_t seeks;
+    extern uint64_t links;
     //user input loop
-    printf("Before input loop");
     while ((opt = getopt(argc, argv, OPTIONS)) != -1) {
         switch (opt) {
         //help menu
@@ -55,11 +57,11 @@ int main(int argc, char *argv[]) {
 	    break;
         // given size of ht
 	case 't':
-	    ht_size = (int) optarg;
+	    ht_size = (uint32_t) optarg;
             break;
 	// given size of bf
         case 'f':
-	    bf_size = (int) optarg;
+	    bf_size = (uint32_t) optarg;
             break;
         default: print_instructions(); break;
         }
@@ -68,8 +70,8 @@ int main(int argc, char *argv[]) {
         print_instructions();
         return 1;
     }
-
-
+    seeks = 0;
+    links = 0;
     // Initialize bloom filter
     BloomFilter *bf = bf_create(bf_size);
     // Initialize hash table
@@ -98,9 +100,6 @@ int main(int argc, char *argv[]) {
 	bf_insert(bf, badspeak);
 	ht_insert(ht, badspeak, NULL);
     }
-    //SEG FAULT IN WHILE^^^
-    //ASSERT WORKS UP UNTIL HERE, THEN SEG FAULT CUTS IT OFF
-    //Perhaps error in reading input file?
 
     // Open newspeak
     infile = fopen("newspeak.txt", "r");
@@ -108,9 +107,10 @@ int main(int argc, char *argv[]) {
         fprintf(stderr, "failed to open newspeak input file");
         return 1;
     }
+    //assert(1 == 0);
     
     struct stat sn;
-    if (stat("newspeak.txt", &sb) == -1) {
+    if (stat("newspeak.txt", &sn) == -1) {
         perror("stat err");
 	exit(EXIT_FAILURE);
     }
@@ -124,8 +124,6 @@ int main(int argc, char *argv[]) {
 	ht_insert(ht, badspeak, newspeak);
     }
 
-    ht_print(ht);
-
     // set input stream to stdin
     infile = stdin;
 
@@ -137,23 +135,21 @@ int main(int argc, char *argv[]) {
 	exit(1);
     }
     while ((new_word = next_word(infile, &regex)) != NULL) {
-        // convert word to lower
-	printf("word read\n");
+	// convert word to lower
         uint32_t j = 0;
-	char word[strlen(new_word)];
+	char *word = malloc(strlen(new_word) + 1);
 	// for each char in word, convert to lower and add to new str
 	while (j < strlen(new_word)) {
 	    word[j] = tolower(new_word[j]);
 	    j++;
 	}
-	
+
 	// bloom filter check
 	if (bf_probe(bf, word)) {
 	    // hash table check
 	    // n is the node containing that badword in hash table, or NULL if not a bad word
 	    Node *n = ht_lookup(ht, word);
 	    if (n != NULL) {
-		printf("word is a badword :o\n");
                 // use of badspeak
 		if (n->newspeak == NULL) {
 		    // record badspeak behavior
@@ -168,26 +164,45 @@ int main(int argc, char *argv[]) {
 	    }
 	}
     }
-    if (thoughtcrime && rightspeak) {
-        printf("%s", mixspeak_message);
-	//TODO: output transgressions
-	for (uint32_t i = 0; i < ll_length(old); i++) {
-            
-	}
+
+    if (stats) {
+        float avg_seek_len = (float) links / (float) seeks;
+	float ht_load = 100 * ((float) ht_count(ht) / (float) ht_size(ht));
+	float bf_load = 100 * ((float) bf_count(bf) / (float) bf_size(bf));
+        printf("Seeks: " PRIu64 " \n", seeks);
+        printf("Average seek length: %f\n", avg_seek_len);
+        printf("Hash table load: %f\n", ht_load);
+        printf("Bloom filter load: %f\n", bf_load);
     }
-    else if (thoughtcrime) {
-        printf("%s", badspeak_message);
-	//TODO: output transgressions
+    else {
+        if (thoughtcrime && rightspeak) {
+            printf("%s", mixspeak_message);
+	    //TODO: output transgressions
+	    ll_print(bad);
+	     ll_print(old);
+        }
+        else if (thoughtcrime) {
+            printf("%s", badspeak_message);
+	    //TODO: output transgressions
+            ll_print(bad);
+        }
+        else if (rightspeak) {
+            printf("%s", goodspeak_message);
+	    //TODO: output transgressions
+            ll_print(old);
+        }
+        else {
+            printf("\n");
+        }
     }
-    else if (rightspeak) {
-        printf("%s", goodspeak_message);
-	//TODO: output transgressions
-    }
+
 
     // clear memory
     fclose(infile);
     clear_words();
     regfree(&regex);
+    ht_delete(&ht);
+    bf_delete(&bf);
 
 }
 

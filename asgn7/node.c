@@ -39,10 +39,10 @@ void node_delete(Node **n) {
 
 void node_print(Node *n) {
     if (n->newspeak == NULL) {
-        printf("(%s -> NULL)", n->oldspeak);
+        printf("%s", n->oldspeak);
     }
     else {
-        printf("(%s -> %s)", n->oldspeak, n->newspeak);
+        printf("%s -> %s", n->oldspeak, n->newspeak);
     }
 }
 
