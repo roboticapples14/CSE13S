@@ -62,6 +62,7 @@ Node *ht_lookup(HashTable *ht, char *oldspeak) {
 }
 
 void ht_insert(HashTable *ht, char *oldspeak, char *newspeak) {
+    // only insert if oldspeak not yet in ht
     if (ht_lookup(ht, oldspeak) == NULL) {
         uint32_t index = hash(ht->salt, oldspeak) % ht->size;
         if (ht->lists[index] == NULL) {
@@ -82,7 +83,7 @@ uint32_t ht_count(HashTable *ht) {
 }
 
 void ht_print(HashTable *ht) {
-    for (int i = 0; i < (int) ht_size(ht); i++) {
+    for (int i = 1; i <= (int) ht_size(ht); i++) {
         printf("hash[%i]: ", i);
 	// if list at index is not empty
         if (ht->lists[i] != NULL) {

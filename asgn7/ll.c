@@ -41,24 +41,25 @@ uint32_t ll_length(LinkedList *ll) {
     return ll->length;
 }
 
-//TODO: this is causing segfault
 Node *ll_lookup(LinkedList *ll, char *oldspeak) {
     // for each node in linked list
-    for (Node *curr = ll->head; curr != NULL; curr = curr->next) {
-        // if oldspeak of node matches searched oldspeak
-	if (strcmp(curr->oldspeak, oldspeak) == 0) {
-            // node was found, so if mtf enabled move queried node to front
-            if (ll->mtf) {
-	        // TODO: check if mtf logic correct
-                curr->prev->next = curr->next;
-	        curr->next->prev = curr->prev;
-	        curr->next = ll->head->next;
-	        curr->prev = ll->head;
-	        ll->head->next = curr;
-	        curr->next->prev = curr;
+    for (Node *curr = ll->head; curr != ll->tail; curr = curr->next) {
+        // only do strcmp if both strings are not NULL
+	if (oldspeak != NULL && curr->oldspeak != NULL) {
+	    // if oldspeak of node matches searched oldspeak
+	    if (strcmp(curr->oldspeak, oldspeak) == 0) {
+                // node was found, so if mtf enabled move queried node to front
+                if (ll->mtf) {
+                    curr->prev->next = curr->next;
+	            curr->next->prev = curr->prev;
+	            curr->next = ll->head->next;
+	            curr->prev = ll->head;
+	            ll->head->next = curr;
+	            curr->next->prev = curr;
+	        }
+	        return curr;
 	    }
-	    return curr;
-	}
+        }
     }
     return NULL;
 }
@@ -66,22 +67,19 @@ Node *ll_lookup(LinkedList *ll, char *oldspeak) {
 // insert node at head
 void ll_insert(LinkedList *ll, char *oldspeak, char *newspeak) {
     // seach linked list to see if oldspeak has already been inserted
-    for (Node *curr = ll->head; curr != NULL; curr = curr->next) {
-        if (strcmp(curr->oldspeak, oldspeak) == 0) {
-            return;
-	}
+    if (ll_lookup(ll, oldspeak) == NULL) {
+        // insert node
+        Node *n = node_create(oldspeak, newspeak);
+        n->prev = ll->head;
+        n->next = ll->head->next;
+        ll->head->next = n;
+        n->next->prev = n;
     }
-    // insert node
-    Node *n = node_create(oldspeak, newspeak);
-    n->next = ll->head->next;
-    n->prev = ll->head;
-    ll->head->next = n;
-    n->next->prev = n;
 }
 
 void ll_print(LinkedList *ll) {
     // for each node in list, print out node
-    for (Node *curr = ll->head; curr != NULL; curr = curr->next) {
+    for (Node *curr = ll->head->next; curr != ll->tail; curr = curr->next) {
         node_print(curr);
 	printf(", ");
     }

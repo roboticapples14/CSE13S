@@ -22,14 +22,11 @@
 
 #define OPTIONS "hmst:f:"
 #define BLOCK 4096
-#define WORD "[a-z]"
+#define WORD "([a-zA-Z0-9]+)(('|-)([a-zA-Z0-9]+))?"
 
 void print_instructions();
 
-
 int main(int argc, char *argv[]) {
-    char *badspeak = NULL;
-    char *newspeak = NULL;
     int opt = 0;
     bool mtf = 0;
     int stats = 0;
@@ -37,7 +34,7 @@ int main(int argc, char *argv[]) {
     uint32_t ht_size = 10000;
     uint32_t bf_size = pow(2, 20); // 2 ^ 20
     char *new_word;
-    FILE *infile = stdin;
+    FILE *infile;
     regex_t regex;
     LinkedList *bad = ll_create(false);	// for recording badspeak words
     LinkedList *old = ll_create(false);	// for recording oldspeak words
@@ -73,8 +70,6 @@ int main(int argc, char *argv[]) {
     }
 
 
-    printf("Before ht_create");
-    
     // Initialize bloom filter
     BloomFilter *bf = bf_create(bf_size);
     // Initialize hash table
@@ -87,16 +82,25 @@ int main(int argc, char *argv[]) {
         fprintf(stderr, "failed to open badspeak input file");
         return 1;
     }
+
+    struct stat sb;
+    if (stat("badspeak.txt", &sb) == -1) {
+        perror("stat err");
+	exit(EXIT_FAILURE);
+    }
+
+    // allocate badspeak to have enough room for infile
+    char *badspeak = malloc(sb.st_size);
 	
     // read in badspeak
-    while ((fscanf(infile, "%s\n", badspeak)) != EOF) {
-        //TODO: test bf_insert in replit
+    while ((fscanf(infile, "%s\n", badspeak)) != -1) {
+	//TODO: test bf_insert in replit
 	bf_insert(bf, badspeak);
 	ht_insert(ht, badspeak, NULL);
     }
     //SEG FAULT IN WHILE^^^
     //ASSERT WORKS UP UNTIL HERE, THEN SEG FAULT CUTS IT OFF
-    assert(1 == 0);
+    //Perhaps error in reading input file?
 
     // Open newspeak
     infile = fopen("newspeak.txt", "r");
@@ -104,6 +108,15 @@ int main(int argc, char *argv[]) {
         fprintf(stderr, "failed to open newspeak input file");
         return 1;
     }
+    
+    struct stat sn;
+    if (stat("newspeak.txt", &sb) == -1) {
+        perror("stat err");
+	exit(EXIT_FAILURE);
+    }
+
+    // allocate badspeak to have enough room for infile
+    char *newspeak = malloc(sn.st_size);	
 
     // read in newspeak
     while ((fscanf(infile, "%s %s\n", badspeak, newspeak)) != EOF) {
@@ -111,6 +124,7 @@ int main(int argc, char *argv[]) {
 	ht_insert(ht, badspeak, newspeak);
     }
 
+    ht_print(ht);
 
     // set input stream to stdin
     infile = stdin;
@@ -124,6 +138,7 @@ int main(int argc, char *argv[]) {
     }
     while ((new_word = next_word(infile, &regex)) != NULL) {
         // convert word to lower
+	printf("word read\n");
         uint32_t j = 0;
 	char word[strlen(new_word)];
 	// for each char in word, convert to lower and add to new str
@@ -138,6 +153,7 @@ int main(int argc, char *argv[]) {
 	    // n is the node containing that badword in hash table, or NULL if not a bad word
 	    Node *n = ht_lookup(ht, word);
 	    if (n != NULL) {
+		printf("word is a badword :o\n");
                 // use of badspeak
 		if (n->newspeak == NULL) {
 		    // record badspeak behavior
@@ -169,9 +185,9 @@ int main(int argc, char *argv[]) {
     }
 
     // clear memory
-    /*fclose(infile);
+    fclose(infile);
     clear_words();
-    regfree(&regex);*/
+    regfree(&regex);
 
 }
 
