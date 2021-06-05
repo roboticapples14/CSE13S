@@ -1,6 +1,7 @@
 #include "ht.h"
 #include "speck.h"
 
+#include <assert.h>
 #include <inttypes.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -52,7 +53,7 @@ uint32_t ht_size(HashTable *ht) {
 
 // sees if word is in hash table at index of hash
 Node *ht_lookup(HashTable *ht, char *oldspeak) {
-    uint32_t index = hash(ht->salt, oldspeak) % ht->size;
+    uint32_t index = hash(ht->salt, oldspeak) % ht_size(ht);
     // if no list at that hash table index, return null
     if (ht->lists[index] == NULL) {
         return NULL;
@@ -66,18 +67,20 @@ Node *ht_lookup(HashTable *ht, char *oldspeak) {
 void ht_insert(HashTable *ht, char *oldspeak, char *newspeak) {
     // only insert if oldspeak not yet in ht
     if (ht_lookup(ht, oldspeak) == NULL) {
+        //SEG FAULT on ll lookup
         uint32_t index = hash(ht->salt, oldspeak) % ht->size;
         if (ht->lists[index] == NULL) {
             ht->lists[index] = ll_create(ht->mtf);
         }
-        ll_insert(ht->lists[index], oldspeak, newspeak);
+        //Seg Fault caused by line below: ll_insert
+	ll_insert(ht->lists[index], oldspeak, newspeak);
     }
 }
 
 uint32_t ht_count(HashTable *ht) {
     uint32_t count = 0;
     for (uint32_t i = 0; i < ht->size; i++) {
-        if (ht->lists[i] != NULL && ll_length(ht->lists[i]) > 0) {
+        if (ht->lists[i] != NULL) {
             count++;
 	}
     }

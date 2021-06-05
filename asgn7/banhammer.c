@@ -32,8 +32,8 @@ int main(int argc, char *argv[]) {
     bool mtf = 0;
     int stats = 0;
     int help = 0;
-    uint32_t ht_size = 10000;
-    uint32_t bf_size = pow(2, 20); // 2 ^ 20
+    uint32_t hash_size = 10000;
+    uint32_t bloom_size = pow(2, 20); // 2 ^ 20
     char *new_word;
     FILE *infile;
     regex_t regex;
@@ -57,11 +57,11 @@ int main(int argc, char *argv[]) {
 	    break;
         // given size of ht
 	case 't':
-	    ht_size = (uint32_t) optarg;
+	    hash_size = (uint32_t) optarg;
             break;
 	// given size of bf
         case 'f':
-	    bf_size = (uint32_t) optarg;
+	    bloom_size = (uint32_t) optarg;
             break;
         default: print_instructions(); break;
         }
@@ -72,10 +72,10 @@ int main(int argc, char *argv[]) {
     }
     seeks = 0;
     links = 0;
-    // Initialize bloom filter
-    BloomFilter *bf = bf_create(bf_size);
     // Initialize hash table
-    HashTable *ht = ht_create(ht_size, mtf);
+    HashTable *ht = ht_create(hash_size, mtf);
+    // Initialize bloom filter
+    BloomFilter *bf = bf_create(bloom_size);
 
 
     // Open badspeak.txt
@@ -98,6 +98,7 @@ int main(int argc, char *argv[]) {
     while ((fscanf(infile, "%s\n", badspeak)) != -1) {
 	//TODO: test bf_insert in replit
 	bf_insert(bf, badspeak);
+	// ht_insert is causing seg fault vv
 	ht_insert(ht, badspeak, NULL);
     }
 
@@ -164,15 +165,23 @@ int main(int argc, char *argv[]) {
 	    }
 	}
     }
-
+    
+    // stats
+    
+    
     if (stats) {
+        uint32_t hash_count = ht_count(ht);
+        //uint32_t hash_size = ht_size(ht);
+        uint32_t bloom_count = bf_count(bf);
+        //uint32_t bloom_size = bf_size(bf);
         float avg_seek_len = (float) links / (float) seeks;
-	float ht_load = 100 * ((float) ht_count(ht) / (float) ht_size(ht));
-	float bf_load = 100 * ((float) bf_count(bf) / (float) bf_size(bf));
-        printf("Seeks: " PRIu64 " \n", seeks);
+	float ht_load = 100 * ((float) hash_count / (float) hash_size);
+	float bf_load = 100 * ((float) bloom_count / (float) bloom_size);
+        
+	printf("Seeks: %" PRIu64 " \n", seeks);
         printf("Average seek length: %f\n", avg_seek_len);
-        printf("Hash table load: %f\n", ht_load);
-        printf("Bloom filter load: %f\n", bf_load);
+        printf("Hash table load: %f%%\n", ht_load);
+        printf("Bloom filter load: %f%%\n", bf_load);
     }
     else {
         if (thoughtcrime && rightspeak) {
