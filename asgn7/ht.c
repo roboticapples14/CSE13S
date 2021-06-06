@@ -6,8 +6,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-uint64_t seeks; // Number of seeks performed.
-uint64_t links; // Number of links traversed.
+//uint64_t seeks; // Number of seeks performed.
+//uint64_t links; // Number of links traversed.
 
 struct HashTable {
     uint64_t salt[2];
@@ -66,7 +66,6 @@ Node *ht_lookup(HashTable *ht, char *oldspeak) {
 
 void ht_insert(HashTable *ht, char *oldspeak, char *newspeak) {
     // only insert if oldspeak not yet in ht
-    if (ht_lookup(ht, oldspeak) == NULL) {
         //SEG FAULT on ll lookup
         uint32_t index = hash(ht->salt, oldspeak) % ht->size;
         if (ht->lists[index] == NULL) {
@@ -74,7 +73,6 @@ void ht_insert(HashTable *ht, char *oldspeak, char *newspeak) {
         }
         //Seg Fault caused by line below: ll_insert
 	ll_insert(ht->lists[index], oldspeak, newspeak);
-    }
 }
 
 uint32_t ht_count(HashTable *ht) {
