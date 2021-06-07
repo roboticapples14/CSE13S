@@ -22,7 +22,6 @@
 
 #define OPTIONS "hmst:f:"
 #define BLOCK 4096
-//TODO: why can start with non-letters?
 #define WORD "([a-zA-Z0-9])+(('|-)([a-zA-Z0-9])+)*"
 
 void print_instructions();
@@ -96,7 +95,6 @@ int main(int argc, char *argv[]) {
 	
     // read in badspeak
     while ((fscanf(infile, "%s\n", badspeak)) != -1) {
-	//TODO: test bf_insert in replit
 	bf_insert(bf, badspeak);
 	// ht_insert is causing seg fault vv
 	ht_insert(ht, badspeak, NULL);
@@ -108,7 +106,6 @@ int main(int argc, char *argv[]) {
         fprintf(stderr, "failed to open newspeak input file");
         return 1;
     }
-    //assert(1 == 0);
     
     struct stat sn;
     if (stat("newspeak.txt", &sn) == -1) {
@@ -129,8 +126,6 @@ int main(int argc, char *argv[]) {
     infile = stdin;
 
     // read user input to filter
-    //TODO: regex
- 
     if (regcomp(&regex, WORD, REG_EXTENDED)) {
         perror("regcomp");
 	exit(1);
@@ -146,7 +141,7 @@ int main(int argc, char *argv[]) {
 	}
 
 	// bloom filter check
-	if (bf_probe(bf, word)) {
+	if (bf_probe(bf, word) == true) {
 	    // hash table check
 	    // n is the node containing that badword in hash table, or NULL if not a bad word
 	    Node *n = ht_lookup(ht, word);
@@ -167,17 +162,11 @@ int main(int argc, char *argv[]) {
     }
     
     // stats
-    
-    
     if (stats) {
-        uint32_t hash_count = ht_count(ht);
-        //uint32_t hash_size = ht_size(ht);
-        uint32_t bloom_count = bf_count(bf);
-        //uint32_t bloom_size = bf_size(bf);
         float avg_seek_len = (float) links / (float) seeks;
-	float ht_load = 100 * ((float) hash_count / (float) hash_size);
-	float bf_load = 100 * ((float) bloom_count / (float) bloom_size);
-        
+	float ht_load = 100 * ((float) ht_count(ht) / (float) hash_size);
+	float bf_load = 100 * ((float) bf_count(bf) / (float) bloom_size);
+        printf("Links: %" PRIu64 "\n", links); //TODO: remove 
 	printf("Seeks: %" PRIu64 " \n", seeks);
         printf("Average seek length: %f\n", avg_seek_len);
         printf("Hash table load: %f%%\n", ht_load);
@@ -186,18 +175,15 @@ int main(int argc, char *argv[]) {
     else {
         if (thoughtcrime && rightspeak) {
             printf("%s", mixspeak_message);
-	    //TODO: output transgressions
 	    ll_print(bad);
 	     ll_print(old);
         }
         else if (thoughtcrime) {
             printf("%s", badspeak_message);
-	    //TODO: output transgressions
             ll_print(bad);
         }
         else if (rightspeak) {
             printf("%s", goodspeak_message);
-	    //TODO: output transgressions
             ll_print(old);
         }
         else {
@@ -212,6 +198,8 @@ int main(int argc, char *argv[]) {
     regfree(&regex);
     ht_delete(&ht);
     bf_delete(&bf);
+    ll_delete(&old);
+    ll_delete(&bad);
 
 }
 
