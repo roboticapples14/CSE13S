@@ -18,7 +18,8 @@ BitVector *bv_create(uint32_t length) {
     v->length = length;
     // if not divisible by 8, needs 1 extra byte to hold length
     int val = length % 8 == 0 ? length / 8 : length / 8 + 1;
-    v->vector = (uint8_t *) calloc(val, sizeof(uint8_t)); // length is in bits, need to convert to bytes
+    v->vector
+        = (uint8_t *) calloc(val, sizeof(uint8_t)); // length is in bits, need to convert to bytes
     if (!v->vector) {
         return NULL;
     }
@@ -46,7 +47,8 @@ void bv_clr_bit(BitVector *bv, uint32_t i) {
 }
 
 uint8_t bv_get_bit(BitVector *bv, uint32_t i) {
-    return (bv->vector[i / 8] >> (i % 8) & 0x1); // shift og vector right by offset, then && with 0x1
+    return (
+        bv->vector[i / 8] >> (i % 8) & 0x1); // shift og vector right by offset, then && with 0x1
 }
 
 void bv_print(BitVector *bv) {

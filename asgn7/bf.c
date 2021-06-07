@@ -1,4 +1,5 @@
 #include "bf.h"
+
 #include "bv.h"
 #include "speck.h"
 
@@ -8,9 +9,9 @@
 #include <string.h>
 
 struct BloomFilter {
-    uint64_t primary[2]; 	// salt #1
-    uint64_t secondary[2];	// salt #2
-    uint64_t tertiary[2];	// salt #3
+    uint64_t primary[2]; // salt #1
+    uint64_t secondary[2]; // salt #2
+    uint64_t tertiary[2]; // salt #3
     BitVector *filter;
 };
 
@@ -18,19 +19,19 @@ BloomFilter *bf_create(uint32_t size) {
     BloomFilter *bf = (BloomFilter *) malloc(sizeof(BloomFilter));
     if (bf) {
         // salt 1
-	bf->primary [0] = 0x5adf08ae86d36f21;
-	bf->primary [1] = 0xa267bbd3116f3957;
+        bf->primary[0] = 0x5adf08ae86d36f21;
+        bf->primary[1] = 0xa267bbd3116f3957;
         // salt 2
-	bf ->secondary [0] = 0x419d292ea2ffd49e;
-	bf->secondary [1] = 0x09601433057d5786;
+        bf->secondary[0] = 0x419d292ea2ffd49e;
+        bf->secondary[1] = 0x09601433057d5786;
         // salt 3
-	bf->tertiary [0] = 0x50d8bb08de3818df;
-	bf->tertiary [1] = 0x4deaae187c16ae1d;
+        bf->tertiary[0] = 0x50d8bb08de3818df;
+        bf->tertiary[1] = 0x4deaae187c16ae1d;
         bf->filter = bv_create(size);
-	if (!bf->filter) {
+        if (!bf->filter) {
             free(bf);
-	    bf = NULL;
-	}
+            bf = NULL;
+        }
     }
     return bf;
 }
@@ -78,4 +79,3 @@ uint32_t bf_count(BloomFilter *bf) {
 void bf_print(BloomFilter *bf) {
     bv_print(bf->filter);
 }
-

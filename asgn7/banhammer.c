@@ -1,28 +1,28 @@
-#include "bv.h"
 #include "bf.h"
+#include "bv.h"
 #include "ht.h"
-#include "node.h"
-#include "messages.h"
 #include "ll.h"
+#include "messages.h"
+#include "node.h"
 #include "parser.h"
 #include "speck.h"
 
 #include <assert.h>
+#include <ctype.h>
 #include <fcntl.h>
 #include <inttypes.h>
 #include <math.h>
+#include <regex.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
-#include <regex.h>
-#include <ctype.h>
 
 #define OPTIONS "hmst:f:"
-#define BLOCK 4096
-#define WORD "([a-zA-Z0-9])+(('|-)([a-zA-Z0-9])+)*"
+#define BLOCK   4096
+#define WORD    "([a-zA-Z0-9])+(('|-)([a-zA-Z0-9])+)*"
 
 void print_instructions();
 
@@ -36,32 +36,24 @@ int main(int argc, char *argv[]) {
     char *new_word;
     FILE *infile;
     regex_t regex;
-    LinkedList *bad = ll_create(false);	// for recording badspeak words
-    LinkedList *old = ll_create(false);	// for recording oldspeak words
-    int thoughtcrime = 0;		// for using badspeak
-    int rightspeak = 0;			// for using oldspeak
+    LinkedList *bad = ll_create(false); // for recording badspeak words
+    LinkedList *old = ll_create(false); // for recording oldspeak words
+    int thoughtcrime = 0; // for using badspeak
+    int rightspeak = 0; // for using oldspeak
     extern uint64_t seeks;
     extern uint64_t links;
     //user input loop
     while ((opt = getopt(argc, argv, OPTIONS)) != -1) {
         switch (opt) {
         //help menu
-        case 'h': 
-	    help = 1; break;
+        case 'h': help = 1; break;
         // verbpse: print compression stats
-        case 'm': 
-	    mtf = true; break;
-        case 's':
-            stats = 1;
-	    break;
+        case 'm': mtf = true; break;
+        case 's': stats = 1; break;
         // given size of ht
-	case 't':
-	    hash_size = (uint32_t) optarg;
-            break;
-	// given size of bf
-        case 'f':
-	    bloom_size = (uint32_t) optarg;
-            break;
+        case 't': hash_size = (uint32_t) optarg; break;
+        // given size of bf
+        case 'f': bloom_size = (uint32_t) optarg; break;
         default: print_instructions(); break;
         }
     }
@@ -76,7 +68,6 @@ int main(int argc, char *argv[]) {
     // Initialize bloom filter
     BloomFilter *bf = bf_create(bloom_size);
 
-
     // Open badspeak.txt
     infile = fopen("badspeak.txt", "r");
     if (infile == NULL) {
@@ -87,17 +78,17 @@ int main(int argc, char *argv[]) {
     struct stat sb;
     if (stat("badspeak.txt", &sb) == -1) {
         perror("stat err");
-	exit(EXIT_FAILURE);
+        exit(EXIT_FAILURE);
     }
 
     // allocate badspeak to have enough room for infile
     char *badspeak = malloc(sb.st_size);
-	
+
     // read in badspeak
     while ((fscanf(infile, "%s\n", badspeak)) != -1) {
-	bf_insert(bf, badspeak);
-	// ht_insert is causing seg fault vv
-	ht_insert(ht, badspeak, NULL);
+        bf_insert(bf, badspeak);
+        // ht_insert is causing seg fault vv
+        ht_insert(ht, badspeak, NULL);
     }
 
     // Open newspeak
@@ -106,20 +97,20 @@ int main(int argc, char *argv[]) {
         fprintf(stderr, "failed to open newspeak input file");
         return 1;
     }
-    
+
     struct stat sn;
     if (stat("newspeak.txt", &sn) == -1) {
         perror("stat err");
-	exit(EXIT_FAILURE);
+        exit(EXIT_FAILURE);
     }
 
     // allocate badspeak to have enough room for infile
-    char *newspeak = malloc(sn.st_size);	
+    char *newspeak = malloc(sn.st_size);
 
     // read in newspeak
     while ((fscanf(infile, "%s %s\n", badspeak, newspeak)) != EOF) {
         bf_insert(bf, badspeak);
-	ht_insert(ht, badspeak, newspeak);
+        ht_insert(ht, badspeak, newspeak);
     }
 
     // set input stream to stdin
@@ -128,69 +119,63 @@ int main(int argc, char *argv[]) {
     // read user input to filter
     if (regcomp(&regex, WORD, REG_EXTENDED)) {
         perror("regcomp");
-	exit(1);
+        exit(1);
     }
     while ((new_word = next_word(infile, &regex)) != NULL) {
-	// convert word to lower
+        // convert word to lower
         uint32_t j = 0;
-	char *word = malloc(strlen(new_word) + 1);
-	// for each char in word, convert to lower and add to new str
-	while (j < strlen(new_word)) {
-	    word[j] = tolower(new_word[j]);
-	    j++;
-	}
+        char *word = malloc(strlen(new_word) + 1);
+        // for each char in word, convert to lower and add to new str
+        while (j < strlen(new_word)) {
+            word[j] = tolower(new_word[j]);
+            j++;
+        }
 
-	// bloom filter check
-	if (bf_probe(bf, word) == true) {
-	    // hash table check
-	    // n is the node containing that badword in hash table, or NULL if not a bad word
-	    Node *n = ht_lookup(ht, word);
-	    if (n != NULL) {
+        // bloom filter check
+        if (bf_probe(bf, word) == true) {
+            // hash table check
+            // n is the node containing that badword in hash table, or NULL if not a bad word
+            Node *n = ht_lookup(ht, word);
+            if (n != NULL) {
                 // use of badspeak
-		if (n->newspeak == NULL) {
-		    // record badspeak behavior
-		    ll_insert(bad, word, NULL);
-		    thoughtcrime = 1;
-		}
-		else {
-		    // record oldspeak behavior
-		    ll_insert(old, word, n->newspeak);
-		    rightspeak = 1;
-		}
-	    }
-	}
+                if (n->newspeak == NULL) {
+                    // record badspeak behavior
+                    ll_insert(bad, word, NULL);
+                    thoughtcrime = 1;
+                } else {
+                    // record oldspeak behavior
+                    ll_insert(old, word, n->newspeak);
+                    rightspeak = 1;
+                }
+            }
+        }
     }
-    
+
     // stats
     if (stats) {
         float avg_seek_len = (float) links / (float) seeks;
-	float ht_load = 100 * ((float) ht_count(ht) / (float) hash_size);
-	float bf_load = 100 * ((float) bf_count(bf) / (float) bloom_size);
-        printf("Links: %" PRIu64 "\n", links); //TODO: remove 
-	printf("Seeks: %" PRIu64 " \n", seeks);
+        float ht_load = 100 * ((float) ht_count(ht) / (float) hash_size);
+        float bf_load = 100 * ((float) bf_count(bf) / (float) bloom_size);
+        printf("Links: %" PRIu64 "\n", links); //TODO: remove
+        printf("Seeks: %" PRIu64 " \n", seeks);
         printf("Average seek length: %f\n", avg_seek_len);
         printf("Hash table load: %f%%\n", ht_load);
         printf("Bloom filter load: %f%%\n", bf_load);
-    }
-    else {
+    } else {
         if (thoughtcrime && rightspeak) {
             printf("%s", mixspeak_message);
-	    ll_print(bad);
-	     ll_print(old);
-        }
-        else if (thoughtcrime) {
+            ll_print(bad);
+            ll_print(old);
+        } else if (thoughtcrime) {
             printf("%s", badspeak_message);
             ll_print(bad);
-        }
-        else if (rightspeak) {
+        } else if (rightspeak) {
             printf("%s", goodspeak_message);
             ll_print(old);
-        }
-        else {
+        } else {
             printf("\n");
         }
     }
-
 
     // clear memory
     fclose(infile);
@@ -200,9 +185,7 @@ int main(int argc, char *argv[]) {
     bf_delete(&bf);
     ll_delete(&old);
     ll_delete(&bad);
-
 }
-
 
 void print_instructions() {
     // Instructions
@@ -220,4 +203,3 @@ void print_instructions() {
     printf("  -t size      Specify hash table size (default: 10000).\n");
     printf("  -f size      Specify Bloom filter size (default: 2^20).\n");
 }
-

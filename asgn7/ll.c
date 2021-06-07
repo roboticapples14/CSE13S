@@ -1,4 +1,5 @@
 #include "ll.h"
+
 #include <assert.h>
 #include <inttypes.h>
 #include <stdio.h>
@@ -12,9 +13,8 @@ struct LinkedList {
     uint32_t length;
     Node *head;
     Node *tail;
-    bool mtf; 	// move to front flag
+    bool mtf; // move to front flag
 };
-
 
 LinkedList *ll_create(bool mtf) {
     LinkedList *ll = (LinkedList *) malloc(sizeof(LinkedList));
@@ -30,7 +30,7 @@ LinkedList *ll_create(bool mtf) {
 void ll_delete(LinkedList **ll) {
     while ((*ll)->head != NULL) {
         Node *temp = (*ll)->head->next;
-	node_delete(&(*ll)->head);
+        node_delete(&(*ll)->head);
         (*ll)->head = temp;
     }
     free(*ll);
@@ -48,20 +48,20 @@ Node *ll_lookup(LinkedList *ll, char *oldspeak) {
     // for each node in linked list
     for (Node *curr = ll->head->next; curr != ll->tail; curr = curr->next) {
         // only do strcmp if both strings are not NULL
-	if (oldspeak != NULL && curr->oldspeak != NULL) {
-	    // if oldspeak of node matches searched oldspeak
-	    if (strcmp(curr->oldspeak, oldspeak) == 0) {
+        if (oldspeak != NULL && curr->oldspeak != NULL) {
+            // if oldspeak of node matches searched oldspeak
+            if (strcmp(curr->oldspeak, oldspeak) == 0) {
                 // node was found, so if mtf enabled move queried node to front
                 if (ll->mtf) {
                     curr->prev->next = curr->next;
-	            curr->next->prev = curr->prev;
-	            curr->next = ll->head->next;
-	            curr->prev = ll->head;
-	            ll->head->next = curr;
-	            curr->next->prev = curr;
-	        }
-	        return curr;
-	    }
+                    curr->next->prev = curr->prev;
+                    curr->next = ll->head->next;
+                    curr->prev = ll->head;
+                    ll->head->next = curr;
+                    curr->next->prev = curr;
+                }
+                return curr;
+            }
         }
         links += 1;
     }
@@ -85,7 +85,6 @@ void ll_print(LinkedList *ll) {
     // for each node in list, print out node
     for (Node *curr = ll->head->next; curr != ll->tail; curr = curr->next) {
         node_print(curr);
-	printf("\n");
+        printf("\n");
     }
 }
-
