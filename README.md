@@ -1,3 +1,2 @@
 # CSE13S Repo
-
-Repo to hold CSE13S work.
+CSE13S: Computer Systems and C Programming
